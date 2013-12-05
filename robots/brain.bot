@@ -1,11 +1,12 @@
-local NeuralNetwork = require('nn')
+local Strategy = require('strategy')
 
-STATE = {
+local STATE = {
 	target = nil,
-	targetingRange = 1000,
-	firingRange = 500,
+	targetingRange = 2000,
+	firingRange = 1000,
 	justDied = false,
-	justKilled = false
+	justKilled = false,
+	personalSpace = 300
 }
 
 INPUTS = {
@@ -55,18 +56,97 @@ INPUTS = {
 			return 1
 		end
 	},
+
+	{
+		name = "closestDangerousProjectile",
+		measure = function()
+			local botPos = bot:getPos()
+
+			if not botPos then
+				return 1
+			end
+
+			local offset = point.new(STATE.personalSpace, STATE.personalSpace)
+			local projectiles = { }
+			bf:findAllObjectsInArea(projectiles, botPos + offset, botPos - offset, ObjType.Bullet, ObjType.Burst, ObjType.Seeker)
+
+			local closest = math.huge
+			for _,projectile in pairs(projectiles) do
+				if projectile:getOwner():getName() ~= bot:getPlayerInfo():getName() then
+					closest = math.min(closest, point.distSquared(projectile:getPos(), botPos))
+				end
+			end
+
+			return closest / math.pow(STATE.personalSpace, 2)
+		end
+	},
 }
 
-ACTIONS = {
+TARGETTING_ACTIONS = {
+	{
+		name = "nothing",
+		enact = function()
+		end
+	},
+
 	{
 		name = "target",
 		enact = function()
 			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
 		end
 	},
+	
+}
+
+MOVEMENT_ACTIONS = {
+	{
+		name = "nothing",
+		enact = function()
+		end
+	},
 
 	{
-		name = "engage",
+		name = "approach",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local targetPos = STATE.target:getPos()
+
+			if STATE.target and targetPos then
+				bot:setThrustToPt(bot:getWaypoint(targetPos) or botPos)
+			end
+		end
+	},
+
+	{
+		name = "flee",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local targetPos = STATE.target:getPos()
+			local botPos = bot:getPos()
+
+			if STATE.target and botPos and targetPos then
+				local offset = botPos - targetPos
+				bot:setThrustToPt(bot:getWaypoint(botPos + offset) or botPos)
+			end
+		end
+	},
+}
+
+WEAPONS_ACTIONS = {
+	{
+		name = "nothing",
+		enact = function()
+		end
+	},
+
+	{
+		name = "phaser",
 		enact = function()
 			if bot == nil or STATE.target == nil then
 				return
@@ -78,32 +158,79 @@ ACTIONS = {
 				bot:setAngle(solution)
 				bot:fireWeapon(Weapon.Phaser)
 			end
+		end
+	},
 
-			if STATE.target and STATE.target:getPos() then
-				bot:setThrustToPt(bot:getWaypoint(STATE.target:getPos()))
+	{
+		name = "burst",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local solution = bot:getFiringSolution(STATE.target)
+
+			if solution then
+				bot:setAngle(solution)
+				bot:fireWeapon(Weapon.Burst)
 			end
 		end
 	},
 	
 }
 
-PLAN = { }
-PLAN_STATES = 30
+SHIELD_ACTIONS = {
+	{
+		name = "nothing",
+		enact = function()
+			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
+		end
+	},
+
+	{
+		name = "activate",
+		enact = function()
+			bot:fireModule(Module.Shield)
+		end
+	},
+	
+}
+
+BOOST_ACTIONS = {
+	{
+		name = "nothing",
+		enact = function()
+			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
+		end
+	},
+
+	{
+		name = "activate",
+		enact = function()
+			bot:fireModule(Module.Turbo)
+		end
+	},
+	
+}
+
 PLAN_INTERVAL = 100
 NEXT_PLAN_TIME = 0
 
-DISCOUNT_RATE = .7
-
-local knowledge = readFromFile('current')
-if knowledge ~= '' then
-	NN = NeuralNetwork.load(knowledge)
-else
-NN = NeuralNetwork.create(#INPUTS, #ACTIONS, 1, (#INPUTS + #ACTIONS) / 2, .2)
-end
+local STRATEGIES = {
+	Strategy.create('weapons',    #INPUTS, WEAPONS_ACTIONS),
+	Strategy.create('targetting', #INPUTS, TARGETTING_ACTIONS),
+	Strategy.create('movement',   #INPUTS, MOVEMENT_ACTIONS),
+	Strategy.create('shield',     #INPUTS, SHIELD_ACTIONS),
+	Strategy.create('boost',      #INPUTS, BOOST_ACTIONS),
+}
 
 function main()
 	subscribe(Event.MsgReceived)
 	subscribe(Event.ScoreChanged)
+end
+
+function getName()
+	return 'BrainBot'
 end
 
 function onMsgReceived()
@@ -115,22 +242,24 @@ local start = getMachineTime()
 function onScoreChanged(scoreChange, teamIndex, player) 
 	if getMachineTime() > lastWrite then
 		lastWrite = getMachineTime()
-		writeToFile('current', NN:save())
+		for i,strategy in ipairs(STRATEGIES) do
+			strategy:save()
+		end
 	end
 
 	if player == bot:getPlayerInfo() and scoreChange > 0 then
 		STATE.justKilled = true
-	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 then
+	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 or
+	       player == bot:getPlayerInfo() and scoreChange < 0 then
 		STATE.justDied = true
 	end
 end
-
 
 local clock = 0
 local deaths = 0
 local kills = 0
 local record = { }
-local RECORD_STATES = 100
+local RECORD_STATES = 20
 function onTick(dt)
 	clock = clock + dt
 
@@ -139,7 +268,11 @@ function onTick(dt)
 	end
 
 	if clock > NEXT_PLAN_TIME then
+
 		local currentInputs = getInputs()
+		for k,v in pairs(STRATEGIES) do
+			v:plan(currentInputs)
+		end
 
 		local reinforcement = 0
 		if STATE.justKilled then
@@ -172,63 +305,20 @@ function onTick(dt)
 			writeToFile("record", tostring(k / d).."\n", true)
 			logprint(k/d)
 
-			local relevance = 1
-
-			-- Evaluate old plans
-			for i = #PLAN,1,-1 do
-
-				local phase = PLAN[i]
-
-				-- Set up our desired output
-				local desiredOutputs = { [phase.actionIndex] = phase.actionConfidence + (reinforcement * relevance) }
-				NN:backwardPropagate(phase.startingInputs, desiredOutputs)
-
-				local relevance = relevance * DISCOUNT_RATE
+			for k,v in pairs(STRATEGIES) do
+				v:learn(reinforcement)
 			end
-		end
-
-		if STATE.justDied then
-			-- The old plan doesn't matter now
-			PLAN = { }
 		end
 
 		STATE.justDied = false
 		STATE.justKilled = false
 
-		-- Pick a new plan
-		local outputs = NN:forewardPropagate(unpack(currentInputs))
-		local bestActionIndex = nil
-		local bestActionConfidence = 0
-		for i,action in ipairs(ACTIONS) do
-			-- logprint(ACTIONS[i].name..': '..tostring(outputs[i]))
-
-			if outputs[i] > bestActionConfidence then
-
-				bestActionIndex = i
-				bestActionConfidence = outputs[i]
-			end
-		end
-		-- logprint()
-
-		local phase = {
-			actionIndex = bestActionIndex,
-			actionConfidence = bestActionConfidence,
-			startingInputs = currentInputs
-			-- TODO: factor action confidence in to learning rate?
-		}
-
-		-- logprint(ACTIONS[bestActionIndex].name)
-
-		table.insert(PLAN, phase)
-		if #PLAN > PLAN_STATES then
-			table.remove(PLAN, 1)
-		end
-
 		NEXT_PLAN_TIME = clock + PLAN_INTERVAL
 	end
 
-	-- Enact latest plan
-	ACTIONS[PLAN[#PLAN].actionIndex].enact()
+	for k,v in pairs(STRATEGIES) do
+		v:enact()
+	end
 end
 
 function getInputs()
