@@ -1,0 +1,244 @@
+local NeuralNetwork = require('nn')
+
+STATE = {
+	target = nil,
+	targetingRange = 1000,
+	firingRange = 500,
+	justDied = false,
+	justKilled = false
+}
+
+INPUTS = {
+	{
+		name = "health",
+		measure = function()
+			return bot:getHealth() or 0
+		end
+	},
+
+	{
+		name = "energy",
+		measure = function()
+			return bot:getEnergy() or 0
+		end
+	},
+
+	{
+		name = "targetHealth",
+		measure = function()
+			if STATE.target == nil then
+				return 0
+			end
+
+			return STATE.target:getHealth() or 0
+		end
+	},
+
+	{
+		name = "canSeeTarget",
+		measure = function()
+			if STATE.target == nil or not STATE.target:getGeom() or not bot:canSeePoint(STATE.target:getGeom())then
+				return 0
+			end
+
+			return 1
+		end
+	},
+
+	{
+		name = "haveTarget",
+		measure = function()
+			if (STATE.target == nil) or (STATE.target:getHealth() == nil) or (STATE.target:getHealth() <= 0) then
+				return 0
+			end
+
+			return 1
+		end
+	},
+}
+
+ACTIONS = {
+	{
+		name = "target",
+		enact = function()
+			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
+		end
+	},
+
+	{
+		name = "engage",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local solution = bot:getFiringSolution(STATE.target)
+
+			if solution then
+				bot:setAngle(solution)
+				bot:fireWeapon(Weapon.Phaser)
+			end
+
+			if STATE.target and STATE.target:getPos() then
+				bot:setThrustToPt(bot:getWaypoint(STATE.target:getPos()))
+			end
+		end
+	},
+	
+}
+
+PLAN = { }
+PLAN_STATES = 30
+PLAN_INTERVAL = 100
+NEXT_PLAN_TIME = 0
+
+DISCOUNT_RATE = .7
+
+local knowledge = readFromFile('current')
+if knowledge ~= '' then
+	NN = NeuralNetwork.load(knowledge)
+else
+NN = NeuralNetwork.create(#INPUTS, #ACTIONS, 1, (#INPUTS + #ACTIONS) / 2, .2)
+end
+
+function main()
+	subscribe(Event.MsgReceived)
+	subscribe(Event.ScoreChanged)
+end
+
+function onMsgReceived()
+	logprint('debugging!')
+end
+
+local lastWrite = 0
+local start = getMachineTime()
+function onScoreChanged(scoreChange, teamIndex, player) 
+	if getMachineTime() > lastWrite then
+		lastWrite = getMachineTime()
+		writeToFile('current', NN:save())
+	end
+
+	if player == bot:getPlayerInfo() and scoreChange > 0 then
+		STATE.justKilled = true
+	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 then
+		STATE.justDied = true
+	end
+end
+
+
+local clock = 0
+local deaths = 0
+local kills = 0
+local record = { }
+local RECORD_STATES = 100
+function onTick(dt)
+	clock = clock + dt
+
+	if bot:getHealth() <= 0 then
+		return
+	end
+
+	if clock > NEXT_PLAN_TIME then
+		local currentInputs = getInputs()
+
+		local reinforcement = 0
+		if STATE.justKilled then
+			-- logprint('killed')
+			kills = kills + 1
+			table.insert(record, true)
+			reinforcement = 1
+		elseif STATE.justDied then
+			-- logprint('died')
+			deaths = deaths + 1
+			table.insert(record, false)
+			reinforcement = -1
+		end
+
+		if #record > RECORD_STATES then
+			table.remove(record, 1)
+		end
+
+		if reinforcement ~= 0 then
+			logprint('kills '..kills)
+			logprint('deaths '..deaths)
+			local k, d = 0, 0
+			for i,v in ipairs(record) do
+				if v then
+					k = k + 1
+				else
+					d = d + 1
+				end
+			end
+			writeToFile("record", tostring(k / d).."\n", true)
+			logprint(k/d)
+
+			local relevance = 1
+
+			-- Evaluate old plans
+			for i = #PLAN,1,-1 do
+
+				local phase = PLAN[i]
+
+				-- Set up our desired output
+				local desiredOutputs = { [phase.actionIndex] = phase.actionConfidence + (reinforcement * relevance) }
+				NN:backwardPropagate(phase.startingInputs, desiredOutputs)
+
+				local relevance = relevance * DISCOUNT_RATE
+			end
+		end
+
+		if STATE.justDied then
+			-- The old plan doesn't matter now
+			PLAN = { }
+		end
+
+		STATE.justDied = false
+		STATE.justKilled = false
+
+		-- Pick a new plan
+		local outputs = NN:forewardPropagate(unpack(currentInputs))
+		local bestActionIndex = nil
+		local bestActionConfidence = 0
+		for i,action in ipairs(ACTIONS) do
+			-- logprint(ACTIONS[i].name..': '..tostring(outputs[i]))
+
+			if outputs[i] > bestActionConfidence then
+
+				bestActionIndex = i
+				bestActionConfidence = outputs[i]
+			end
+		end
+		-- logprint()
+
+		local phase = {
+			actionIndex = bestActionIndex,
+			actionConfidence = bestActionConfidence,
+			startingInputs = currentInputs
+			-- TODO: factor action confidence in to learning rate?
+		}
+
+		-- logprint(ACTIONS[bestActionIndex].name)
+
+		table.insert(PLAN, phase)
+		if #PLAN > PLAN_STATES then
+			table.remove(PLAN, 1)
+		end
+
+		NEXT_PLAN_TIME = clock + PLAN_INTERVAL
+	end
+
+	-- Enact latest plan
+	ACTIONS[PLAN[#PLAN].actionIndex].enact()
+end
+
+function getInputs()
+	local result = { }
+
+	for i,input in ipairs(INPUTS) do
+		local v = input.measure()
+		result[input.name] = v
+		result[i] = v
+	end
+
+	return result
+end
