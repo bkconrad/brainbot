@@ -1,5 +1,17 @@
 local NeuralNetwork = require('nn')
-local Strategy = { }
+local Strategy = { verbosity = 0 }
+
+local function v(...)
+	if Strategy.verbosity >= 1 then
+		logprint(unpack(arg))
+	end
+end
+
+local function vv(...)
+	if Strategy.verbosity >= 2 then
+		logprint(unpack(arg))
+	end
+end
 
 local function copy(t)
 	local result = { }
@@ -13,8 +25,8 @@ local LEARNING_RATE = 0.5
 local HIDDEN_LAYERS = 1.0
 local DISCOUNT_RATE = 0.7
 local PLAN_STATES   = 30
-local RECORD_STATES = 10
-local EXPERIMENTATION_FACTOR = .1
+local RECORD_STATES = 3
+local EXPERIMENTATION_FACTOR = .5
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -22,7 +34,7 @@ function Strategy.create(name, numObservations, actions)
 	local data = readFromFile(name..'.knowledge')
 
 	if data ~= '' then
-		logprint('Loading '..name)
+		v('Loading '..name)
 		result.network = NeuralNetwork.load(data)
 	else
 		result.network = NeuralNetwork.create(numObservations, #actions, HIDDEN_LAYERS, (numObservations + #actions) / 2, LEARNING_RATE)
@@ -39,8 +51,10 @@ function Strategy:plan(observations)
 	local actionConfidenceLevels = self.network:forewardPropagate(unpack(observations))
 	local bestActionIndex = nil
 	local bestActionConfidence = 0
+
+	vv(self.name..' planning:')
 	for i,action in ipairs(self.actions) do
-		-- logprint(self.actions[i].name..': '..tostring(observations[i]))
+		vv(self.actions[i].name..': '..tostring(observations[i]))
 
 		if observations[i] > bestActionConfidence then
 
@@ -48,7 +62,6 @@ function Strategy:plan(observations)
 			bestActionConfidence = observations[i]
 		end
 	end
-	-- logprint()
 
 	local phase = {
 		actionIndex = bestActionIndex,
@@ -56,7 +69,8 @@ function Strategy:plan(observations)
 		startingInputs = observations
 	}
 
-	-- logprint(self.actions[bestActionIndex].name)
+	vv(self.actions[bestActionIndex].name)
+	vv()
 
 	table.insert(self.history, phase)
 	if #self.history > PLAN_STATES then
@@ -112,7 +126,6 @@ function Strategy:experiment(reinforcement)
 	-- Record current experiment performance via reinforcement
 	if #self.experiments > 0 then
 		table.insert(self.experiments[#self.experiments].record, reinforcement)
-		-- logprint('recorded '..tostring(reinforcement))
 	end
 
 	-- If there is no current experiment, or the current experiment is over
@@ -137,7 +150,7 @@ function Strategy:experiment(reinforcement)
 			table.insert(self.experiments, experiment)
 			-- Modulate the weight according to the experiment
 			self.network[i][j][k] = self.network[i][j][k] + self.experiments[#self.experiments].hypothesis
-			-- logprint('starting new experiment')
+			vv('starting new experiment')
 		else
 			-- This round of experiments is over!
 			-- Pick the best one and apply it permanently
@@ -165,7 +178,7 @@ function Strategy:experiment(reinforcement)
 
 			-- Clear experiments
 			self.experiments = { }
-			-- logprint('starting new round of experiments')
+			v(logprint('starting new round of experiments'))
 		end
 	end
 end

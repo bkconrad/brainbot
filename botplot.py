@@ -13,13 +13,21 @@ i = 0
 def runningMeanFast(x, N):
 	return np.convolve(x, np.ones((N,))/N)[(N-1):]
 
-plt.ion()
+while sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+  line = sys.stdin.readline()
+  if line:
+  	print(line)
+	y.append(float(line))
+	x.append(i)
+
+	i += 1
 
 graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
-graph2 = plt.plot(x, y, 'b', linewidth=2)[0]
-graph3 = plt.plot(x, y, 'r', linewidth=2)[0]
+graph2 = plt.plot(x, runningMeanFast(y, 100), 'b', linewidth=2)[0]
+graph3 = plt.plot(x, runningMeanFast(y, 1000), 'r', linewidth=2)[0]
 
-#plt.show()
+plt.ion()
+
 
 while True:
 	# If there's input ready, do something, else do something

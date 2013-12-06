@@ -1,12 +1,31 @@
 local Strategy = require('strategy')
 
+local VERBOSITY = 0
+local function v(...)
+	if VERBOSITY >= 1 then
+		logprint(unpack(arg))
+	end
+end
+
+local function vv(...)
+	if VERBOSITY >= 2 then
+		logprint(unpack(arg))
+	end
+end
+
+local argumentHandlers = {
+	verbose = function() VERBOSITY=1 ; Strategy.verbosity=VERBOSITY end,
+	vverbose = function() VERBOSITY=2 ; Strategy.verbosity=VERBOSITY end,
+}
+
 local STATE = {
 	target = nil,
 	targetingRange = 2000,
 	firingRange = 1000,
 	justDied = false,
 	justKilled = false,
-	personalSpace = 300
+	personalSpace = 300,
+	repairItemTarget = nil
 }
 
 INPUTS = {
@@ -80,6 +99,30 @@ INPUTS = {
 			return closest / math.pow(STATE.personalSpace, 2)
 		end
 	},
+
+	{
+		name = "closestRepairItem",
+		measure = function()
+			local botPos = bot:getPos()
+
+			if not botPos then
+				return 1
+			end
+
+			local repairItems = { }
+			bf:findAllObjects(repairItems, ObjType.RepairItem)
+
+			local closest = math.huge
+			for _,repairItem in pairs(repairItems) do
+				local distSquared = math.min(closest, point.distSquared(repairItem:getPos(), botPos))
+				if distSquared < closest then
+					STATE.repairItemTarget = repairItem
+				end
+			end
+
+			return closest / math.pow(STATE.targetingRange, 2)
+		end
+	},
 }
 
 TARGETTING_ACTIONS = {
@@ -133,6 +176,22 @@ MOVEMENT_ACTIONS = {
 			if STATE.target and botPos and targetPos then
 				local offset = botPos - targetPos
 				bot:setThrustToPt(bot:getWaypoint(botPos + offset) or botPos)
+			end
+		end
+	},
+
+	{
+		name = "repair",
+		enact = function()
+			if bot == nil or STATE.repairItemTarget == nil then
+				return
+			end
+
+			local targetPos = STATE.repairItemTarget:getPos()
+			local botPos = bot:getPos()
+
+			if botPos and targetPos then
+				bot:setThrustToPt(bot:getWaypoint(targetPos) or botPos)
 			end
 		end
 	},
@@ -225,6 +284,13 @@ local STRATEGIES = {
 }
 
 function main()
+	for i=1,#arg do
+		for k,handler in ipairs(argumentHandlers) do
+			if string.find(k, arg[i]) == 1 then
+				handler()
+			end
+		end
+	end
 	subscribe(Event.MsgReceived)
 	subscribe(Event.ScoreChanged)
 end
@@ -268,12 +334,12 @@ function onTick(dt)
 
 		local reinforcement = 0
 		if STATE.justKilled then
-			-- logprint('killed')
+			vv('killed')
 			kills = kills + 1
 			table.insert(record, true)
 			reinforcement = 1
 		elseif STATE.justDied then
-			-- logprint('died')
+			vv('died')
 			deaths = deaths + 1
 			table.insert(record, false)
 			reinforcement = -1
@@ -284,8 +350,8 @@ function onTick(dt)
 		end
 
 		if reinforcement ~= 0 then
-			logprint('kills '..kills)
-			logprint('deaths '..deaths)
+			vv('kills '..kills)
+			vv('deaths '..deaths)
 			local k, d = 0, 0
 			for i,v in ipairs(record) do
 				if v then
@@ -295,7 +361,7 @@ function onTick(dt)
 				end
 			end
 			writeToFile("record", tostring(k / d).."\n", true)
-			logprint(k/d)
+			vv(k/d)
 
 			for k,v in pairs(STRATEGIES) do
 				v:experiment(reinforcement)
