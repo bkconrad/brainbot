@@ -237,15 +237,7 @@ function onMsgReceived()
 	logprint('debugging!')
 end
 
-local lastWrite = 0
-local start = getMachineTime()
 function onScoreChanged(scoreChange, teamIndex, player) 
-	if getMachineTime() > lastWrite then
-		lastWrite = getMachineTime()
-		for i,strategy in ipairs(STRATEGIES) do
-			strategy:save()
-		end
-	end
 
 	if player == bot:getPlayerInfo() and scoreChange > 0 then
 		STATE.justKilled = true
@@ -306,7 +298,7 @@ function onTick(dt)
 			logprint(k/d)
 
 			for k,v in pairs(STRATEGIES) do
-				v:learn(reinforcement)
+				v:experiment(reinforcement)
 			end
 		end
 
