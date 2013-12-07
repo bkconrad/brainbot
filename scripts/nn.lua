@@ -1,7 +1,7 @@
 ACTIVATION_RESPONSE = 1
 
 NeuralNetwork = {
-	transfer = function( x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
+	transfer = function(x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
 }
 
 function getn(t)
@@ -78,13 +78,11 @@ function NeuralNetwork:forewardPropagate(...)
 end
 
 function NeuralNetwork:backwardPropagate(inputs,desiredOutputs)
-	--[[
 	if getn(inputs) ~= getn(self[1]) then
 		error("Neural Network received "..getn(inputs).." input[s] (expected "..getn(self[1]).." input[s])",2)
 	elseif getn(desiredOutputs) ~= getn(self[getn(self)]) then
 		error("Neural Network received "..getn(desiredOutputs).." desired output[s] (expected "..getn(self[getn(self)]).." desired output[s])",2)
 	end
-	]]
 	self:forewardPropagate(inputs) --update the internal inputs and outputs
 	for i = getn(self),2,-1 do --iterate backwards (nothing to calculate for input layer)
 		local tempResults = {}

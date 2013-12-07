@@ -21,12 +21,23 @@ local function copy(t)
 	return result
 end
 
+local function cat(t1, t2)
+	local result = { }
+	for i,v in ipairs(t1) do
+		table.insert(result, v)
+	end
+	for i,v in ipairs(t2) do
+		table.insert(result, v)
+	end
+	return result
+end
+
 local LEARNING_RATE = 0.5
 local HIDDEN_LAYERS = 1.0
 local DISCOUNT_RATE = 0.7
+local ASSESSMENT_DISCOUNT = 0.9
 local PLAN_STATES   = 30
 local RECORD_STATES = 3
-local EXPERIMENTATION_FACTOR = .5
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -37,40 +48,81 @@ function Strategy.create(name, numObservations, actions)
 		v('Loading '..name)
 		result.network = NeuralNetwork.load(data)
 	else
-		result.network = NeuralNetwork.create(numObservations, #actions, HIDDEN_LAYERS, (numObservations + #actions) / 2, LEARNING_RATE)
+
+		-- The Q Value network. A Map of State, Action combinations to expected rewards.
+		-- Whenever a reward is received, each phase in the plan is visited in reverse
+		-- order. This network is trained to expect the given reward from the given
+		-- state action pair, at a learning rate equal to ASSESSMENT_DISCOUNT^i where i
+		-- is the index of this phase, starting from the most recently executed phase.
+		-- This means older phases have less impact on our assessment training.
+		--
+		-- This network is used to search for the optimal policy. During training of the
+		-- policy network, each recorded state is combined with each possible action,
+		-- then run through the assessment network. The State, Action pair with the
+		-- highest expected reward by our assessment is trained for.
+		result.network = NeuralNetwork.create(numObservations + #actions, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, LEARNING_RATE)
 	end
+
+
 	result.name = name
 	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
-	result.experiments = { }
 	result.actions = actions
+	result.experimentationFactor = .2 -- Amount of experimentation to do
 
 	return result
 end
 
 function Strategy:plan(observations)
-	local actionConfidenceLevels = self.network:forewardPropagate(unpack(observations))
-	local bestActionIndex = nil
-	local bestActionConfidence = 0
 
-	vv(self.name..' planning:')
-	for i,action in ipairs(self.actions) do
-		vv(self.actions[i].name..': '..tostring(observations[i]))
+	local bestActionIndex = 1
+	local bestActionValue = 0
+	local chosenActions = { } -- 0.0 for foregone options, 1.0 for the selected one
 
-		if observations[i] > bestActionConfidence then
+	for i,v in ipairs(self.actions) do
+		-- Initialize all values to 0.0
+		chosenActions[i] = 0.0
+	end
 
-			bestActionIndex = i
-			bestActionConfidence = observations[i]
+	if math.random() < self.experimentationFactor then
+		-- Randomly try something
+		bestActionIndex = math.random(1, #self.actions)
+		chosenActions[bestActionIndex] = 1.0
+		-- Combined State + Action table
+		bestActionValue = (self.network:forewardPropagate(unpack(cat(observations, chosenActions))))[1]
+	else
+		-- Carefully plan our next move by comparing the expected value of each
+		-- action in the current state
+		vv(self.name..' planning:')
+		for i,action in ipairs(self.actions) do
+
+			-- Set this action as chosen
+			chosenActions[i] = 1.0
+
+			-- Get the Q value
+			value = (self.network:forewardPropagate(unpack(cat(observations, chosenActions))))[1]
+			vv(self.actions[i].name..': '..tostring(value))
+
+			-- Keep the best action
+			if value > bestActionValue then
+				bestActionIndex = i
+				bestActionValue = value
+			end
+
+			-- Set this action as not chosen to prepare for the next iteration
+			chosenActions[i] = 0.0
 		end
 	end
 
 	local phase = {
-		actionIndex = bestActionIndex,
-		actionConfidence = bestActionConfidence,
-		startingInputs = observations
+		startingInputs   = observations,    -- State when this action was chosen
+		actionIndex      = bestActionIndex, -- The chosen action
+		actionValue      = bestActionValue, -- The expected value of this action
 	}
 
 	vv(self.actions[bestActionIndex].name)
 	vv()
+
+	-- self.experimentationFactor = self.experimentationFactor * 0.8
 
 	table.insert(self.history, phase)
 	if #self.history > PLAN_STATES then
@@ -80,18 +132,32 @@ end
 
 function Strategy:learn(reinforcement)
 	local relevance = 1
+	local chosenActions = { } -- 0.0 for foregone options, 1.0 for the selected one
+
+	for i,v in ipairs(self.actions) do
+		-- Initialize all values to 0.0
+		chosenActions[i] = 0.0
+	end
+
+	self.network._learningRate = 0.8
 
 	-- Evaluate old plans
+	local lastReward = reinforcement
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
+		chosenActions[phase.actionIndex] = 1.0
 
-		-- Set up our desired output
-		local desiredOutputs = { [phase.actionIndex] = phase.actionConfidence + (reinforcement * relevance) }
-		self.network:backwardPropagate(phase.startingInputs, desiredOutputs)
-
-		local relevance = relevance * DISCOUNT_RATE
+		-- Reinforced reward
+		local desiredOutputs = { reinforcement }
+		self.network:backwardPropagate(cat(phase.startingInputs, chosenActions), desiredOutputs)
+		chosenActions[phase.actionIndex] = 0.0
+		self.network._learningRate = self.network._learningRate * DISCOUNT_RATE
 	end
+
+	self:save()
+
+	-- self.history = { }
 end
 
 function Strategy:enact()
@@ -101,86 +167,6 @@ end
 
 function Strategy:save()
 	writeToFile(self.name..'.knowledge', self.network:save())
-end
-
-function Strategy:_index2weight(index)
-	if index < 1 then
-		return
-	end
-
-	local n = 0
-	for i=2,#self.network do                  -- For each layer after the input layer
-		for j=1,#self.network[i] do           -- For each neuron in the layer before i
-			for k=1,#self.network[i][j] do    -- For each neuron in i
-				n = n + 1                     -- Count by one
-
-				if n >= index then
-					return i, j, k
-				end
-			end
-		end
-	end
-end
-
-function Strategy:experiment(reinforcement)
-	-- Record current experiment performance via reinforcement
-	if #self.experiments > 0 then
-		table.insert(self.experiments[#self.experiments].record, reinforcement)
-	end
-
-	-- If there is no current experiment, or the current experiment is over
-	if #self.experiments == 0 or #self.experiments[#self.experiments].record >= RECORD_STATES then
-
-		-- De-modulate old experiment's weight
-		local i, j, k = self:_index2weight(#self.experiments)
-		if i and j and k then
-			self.network[i][j][k] = self.network[i][j][k] - self.experiments[#self.experiments].hypothesis
-		end
-
-		-- Look for the next weight to experiment with, taking parity as 1, then -1
-		local parity
-		for _parity = 1,-1,-2 do
-			parity = _parity
-			i, j, k = self:_index2weight(#self.experiments + 1)
-		end
-
-		-- If there is another weight to experiment with, then start the experiment
-		if i and j and k then
-			local experiment = { record = { }, hypothesis = parity * EXPERIMENTATION_FACTOR }
-			table.insert(self.experiments, experiment)
-			-- Modulate the weight according to the experiment
-			self.network[i][j][k] = self.network[i][j][k] + self.experiments[#self.experiments].hypothesis
-			vv('starting new experiment')
-		else
-			-- This round of experiments is over!
-			-- Pick the best one and apply it permanently
-			-- TODO: Select all changes which performed better than some threshold
-			local bestExperimentIndex = 0
-			local bestExperimentPerformance = -math.huge
-			for i,experiment in ipairs(self.experiments) do
-				local performance = 0
-				for j,score in ipairs(experiment.record) do
-					performance = performance + score
-				end
-
-				if performance > bestExperimentPerformance then
-					bestExperimentIndex = i
-					bestExperimentPerformance = performance
-				end
-			end
-
-			-- Modulate according to the given hypothesis, permanently
-			local i, j, k = self:_index2weight(bestExperimentIndex)
-			self.network[i][j][k] = self.network[i][j][k] + self.experiments[bestExperimentIndex].hypothesis
-
-			-- Save
-			self:save()
-
-			-- Clear experiments
-			self.experiments = { }
-			v(logprint('starting new round of experiments'))
-		end
-	end
 end
 
 return Strategy

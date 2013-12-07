@@ -1,4 +1,5 @@
 local Strategy = require('strategy')
+local RECORD_STATES = 20
 
 local VERBOSITY = 0
 local function v(...)
@@ -14,9 +15,13 @@ local function vv(...)
 end
 
 local argumentHandlers = {
-	verbose = function() VERBOSITY=1 ; Strategy.verbosity=VERBOSITY end,
-	vverbose = function() VERBOSITY=2 ; Strategy.verbosity=VERBOSITY end,
+	verbose = function() VERBOSITY=1 end,
+	vverbose = function() VERBOSITY=2 end,
 }
+
+local deaths = 0
+local kills = 0
+local record = { }
 
 local STATE = {
 	target = nil,
@@ -96,6 +101,8 @@ INPUTS = {
 				end
 			end
 
+			if closest == math.huge then return 1.0 end
+
 			return closest / math.pow(STATE.personalSpace, 2)
 		end
 	},
@@ -113,12 +120,15 @@ INPUTS = {
 			bf:findAllObjects(repairItems, ObjType.RepairItem)
 
 			local closest = math.huge
+			STATE.repairItemTarget = nil
 			for _,repairItem in pairs(repairItems) do
 				local distSquared = math.min(closest, point.distSquared(repairItem:getPos(), botPos))
-				if distSquared < closest then
+				if repairItem:isVis() and distSquared < closest then
 					STATE.repairItemTarget = repairItem
 				end
 			end
+
+			if closest == math.huge then return 1.0 end
 
 			return closest / math.pow(STATE.targetingRange, 2)
 		end
@@ -305,19 +315,49 @@ end
 
 function onScoreChanged(scoreChange, teamIndex, player) 
 
+	local reinforcement = 0
 	if player == bot:getPlayerInfo() and scoreChange > 0 then
-		STATE.justKilled = true
+		reinforcement = 1
 	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 or
 	       player == bot:getPlayerInfo() and scoreChange < 0 then
-		STATE.justDied = true
+		reinforcement = -1
+	end
+
+	if reinforcement == 1 then
+		kills = kills + 1
+		table.insert(record, true)
+	elseif reinforcement == -1 then
+		deaths = deaths + 1
+		table.insert(record, false)
+	end
+
+	if #record > RECORD_STATES then
+		table.remove(record, 1)
+	end
+
+	if reinforcement ~= 0 then
+		v('kills '..kills)
+		v('deaths '..deaths)
+		local k, d = 0, 0
+		for i,v in ipairs(record) do
+			if v then
+				k = k + 1
+			else
+				d = d + 1
+			end
+		end
+		local kdr = k / d
+		if kdr == math.huge then kdr = k end
+		writeToFile("record", tostring(kdr).."\n", true)
+		vv(k/d)
+
+		for k,v in pairs(STRATEGIES) do
+			v:learn(reinforcement)
+		end
 	end
 end
 
 local clock = 0
-local deaths = 0
-local kills = 0
-local record = { }
-local RECORD_STATES = 20
 function onTick(dt)
 	clock = clock + dt
 
@@ -331,45 +371,6 @@ function onTick(dt)
 		for k,v in pairs(STRATEGIES) do
 			v:plan(currentInputs)
 		end
-
-		local reinforcement = 0
-		if STATE.justKilled then
-			vv('killed')
-			kills = kills + 1
-			table.insert(record, true)
-			reinforcement = 1
-		elseif STATE.justDied then
-			vv('died')
-			deaths = deaths + 1
-			table.insert(record, false)
-			reinforcement = -1
-		end
-
-		if #record > RECORD_STATES then
-			table.remove(record, 1)
-		end
-
-		if reinforcement ~= 0 then
-			vv('kills '..kills)
-			vv('deaths '..deaths)
-			local k, d = 0, 0
-			for i,v in ipairs(record) do
-				if v then
-					k = k + 1
-				else
-					d = d + 1
-				end
-			end
-			writeToFile("record", tostring(k / d).."\n", true)
-			vv(k/d)
-
-			for k,v in pairs(STRATEGIES) do
-				v:experiment(reinforcement)
-			end
-		end
-
-		STATE.justDied = false
-		STATE.justKilled = false
 
 		NEXT_PLAN_TIME = clock + PLAN_INTERVAL
 	end
