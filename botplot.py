@@ -16,7 +16,6 @@ def runningMeanFast(x, N):
 while sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
   line = sys.stdin.readline()
   if line:
-  	print(line)
 	y.append(float(line))
 	x.append(i)
 
@@ -28,14 +27,12 @@ graph3 = plt.plot(x, runningMeanFast(y, 1000), 'r', linewidth=2)[0]
 
 plt.ion()
 
-
 while True:
 	# If there's input ready, do something, else do something
 	# else. Note timeout is zero so select won't block at all.
 	while sys.stdin in select.select([sys.stdin], [], [], .2)[0]:
 	  line = sys.stdin.readline()
 	  if line:
-	  	print(line)
 		y.append(float(line))
 		x.append(i)
 
@@ -51,6 +48,6 @@ while True:
 		graph2.set_ydata(runningMeanFast(y, 100))
 		graph3.set_xdata(x)
 		graph3.set_ydata(runningMeanFast(y, 1000))
-		plt.show()
 		plt.draw()
+		plt.show()
 		plt.pause(3)

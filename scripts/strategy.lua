@@ -41,65 +41,71 @@ local RECORD_STATES = 3
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
+	result.networks = { }
 
-	local data = readFromFile(name..'.knowledge')
+	-- Load or create neural networks
+	for i,action in ipairs(actions) do
+		local data = readFromFile(name..'-'..action.name..'.knowledge')
+		if data ~= '' then
+			v('Loading '..name)
+			table.insert(result.networks, NeuralNetwork.load(data))
+		else
 
-	if data ~= '' then
-		v('Loading '..name)
-		result.network = NeuralNetwork.load(data)
-	else
-
-		-- The Q Value network. A Map of State, Action combinations to expected rewards.
-		-- Whenever a reward is received, each phase in the plan is visited in reverse
-		-- order. This network is trained to expect the given reward from the given
-		-- state action pair, at a learning rate equal to ASSESSMENT_DISCOUNT^i where i
-		-- is the index of this phase, starting from the most recently executed phase.
-		-- This means older phases have less impact on our assessment training.
-		--
-		-- This network is used to search for the optimal policy. During training of the
-		-- policy network, each recorded state is combined with each possible action,
-		-- then run through the assessment network. The State, Action pair with the
-		-- highest expected reward by our assessment is trained for.
-		result.network = NeuralNetwork.create(numObservations + #actions, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, LEARNING_RATE)
+			-- The Q Value networks. There is one network per action. These are
+			-- trained to give the expected value of each action given a
+			-- starting state. Because our state space is continuous rather than
+			-- discrete, the Q values can not be stored in a table. Neural
+			-- networks give us not only the ability to assess Q values in the
+			-- continuous state space, but also to generalize Q values across
+			-- similar states.
+			--
+			-- The output of each network is a single scalar output representing
+			-- the expected Q value. When the strategy is assessed, each phase
+			-- in action history is visited in reverse order. The network
+			-- corresponding to the action in that phase is trained towards the
+			-- actual reward received by the latest phase (which lead to an
+			-- absorbing state such as dying or killing). The learning rate for
+			-- the training of each phase is equal to LEARNING_RATE^i where i is
+			-- the (positive) index of each phase relative to the most recent.
+			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, LEARNING_RATE))
+		end
 	end
 
 
 	result.name = name
 	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
 	result.actions = actions
-	result.experimentationFactor = .2 -- Amount of experimentation to do
+	result.experimentationFactor = .8 -- Amount of experimentation to do
 
 	return result
 end
 
-function Strategy:plan(observations)
+function Strategy:plan(observations, allowExperimentation)
 
 	local bestActionIndex = 1
 	local bestActionValue = 0
-	local chosenActions = { } -- 0.0 for foregone options, 1.0 for the selected one
 
-	for i,v in ipairs(self.actions) do
-		-- Initialize all values to 0.0
-		chosenActions[i] = 0.0
+	if allowExperimentation == nil then
+		allowExperimentation = true
 	end
 
-	if math.random() < self.experimentationFactor then
-		-- Randomly try something
+	if allowExperimentation and math.random() < self.experimentationFactor then
+		-- Randomly select an action to take -- this is essential to the
+		-- learning process because it eliminates the possibility that there is
+		-- something better we could be doing
 		bestActionIndex = math.random(1, #self.actions)
-		chosenActions[bestActionIndex] = 1.0
-		-- Combined State + Action table
-		bestActionValue = (self.network:forewardPropagate(unpack(cat(observations, chosenActions))))[1]
+
+		-- Expected value of taking this action in the given state
+		bestActionValue = self.networks[bestActionIndex]:forewardPropagate(observations)[1]
 	else
 		-- Carefully plan our next move by comparing the expected value of each
 		-- action in the current state
 		vv(self.name..' planning:')
+
 		for i,action in ipairs(self.actions) do
 
-			-- Set this action as chosen
-			chosenActions[i] = 1.0
-
-			-- Get the Q value
-			value = (self.network:forewardPropagate(unpack(cat(observations, chosenActions))))[1]
+			-- Expected value of taking this action in the given state
+			local value = self.networks[i]:forewardPropagate(observations)[1]
 			vv(self.actions[i].name..': '..tostring(value))
 
 			-- Keep the best action
@@ -107,9 +113,6 @@ function Strategy:plan(observations)
 				bestActionIndex = i
 				bestActionValue = value
 			end
-
-			-- Set this action as not chosen to prepare for the next iteration
-			chosenActions[i] = 0.0
 		end
 	end
 
@@ -122,8 +125,6 @@ function Strategy:plan(observations)
 	vv(self.actions[bestActionIndex].name)
 	vv()
 
-	-- self.experimentationFactor = self.experimentationFactor * 0.8
-
 	table.insert(self.history, phase)
 	if #self.history > PLAN_STATES then
 		table.remove(self.history, 1)
@@ -132,28 +133,23 @@ end
 
 function Strategy:learn(reinforcement)
 	local relevance = 1
-	local chosenActions = { } -- 0.0 for foregone options, 1.0 for the selected one
-
-	for i,v in ipairs(self.actions) do
-		-- Initialize all values to 0.0
-		chosenActions[i] = 0.0
-	end
-
-	self.network._learningRate = 0.8
+	local learningRate = 1.0
 
 	-- Evaluate old plans
 	local lastReward = reinforcement
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
-		chosenActions[phase.actionIndex] = 1.0
 
 		-- Reinforced reward
 		local desiredOutputs = { reinforcement }
-		self.network:backwardPropagate(cat(phase.startingInputs, chosenActions), desiredOutputs)
-		chosenActions[phase.actionIndex] = 0.0
-		self.network._learningRate = self.network._learningRate * DISCOUNT_RATE
+		self.networks[phase.actionIndex]._learningRate = learningRate
+		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
+
+		learningRate = learningRate * DISCOUNT_RATE
 	end
+
+	-- self.experimentationFactor = self.experimentationFactor * 0.9
 
 	self:save()
 
@@ -166,7 +162,9 @@ function Strategy:enact()
 end
 
 function Strategy:save()
-	writeToFile(self.name..'.knowledge', self.network:save())
+	for i,action in ipairs(self.actions) do
+		writeToFile(self.name..'-'..action.name..'.knowledge', self.networks[i]:save())
+	end
 end
 
 return Strategy
