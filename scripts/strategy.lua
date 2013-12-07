@@ -32,12 +32,12 @@ local function cat(t1, t2)
 	return result
 end
 
-local LEARNING_RATE = 0.5
 local HIDDEN_LAYERS = 1.0
-local DISCOUNT_RATE = 0.7
-local ASSESSMENT_DISCOUNT = 0.9
 local PLAN_STATES   = 30
 local RECORD_STATES = 3
+local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
+local EXPERIMENT_DECAY = .5^(1/5000)        -- Halflife of 1,000 turns
+local LEARNING_DECAY   = .5^(1/5000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -75,7 +75,7 @@ function Strategy.create(name, numObservations, actions)
 	result.name = name
 	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
 	result.actions = actions
-	result.experimentationFactor = .8 -- Amount of experimentation to do
+	result.experimentationFactor = 0.1 -- Amount of experimentation to do
 
 	return result
 end
@@ -131,39 +131,47 @@ function Strategy:plan(observations, allowExperimentation)
 	end
 end
 
-function Strategy:learn(reinforcement)
+function Strategy:learn(reward)
 	local relevance = 1
 	local learningRate = 1.0
 
+	vv(self.name..' learning with reward = '..reward)
+
 	-- Evaluate old plans
-	local lastReward = reinforcement
+	local lastReward = reward
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
 
 		-- Reinforced reward
-		local desiredOutputs = { reinforcement }
-		self.networks[phase.actionIndex]._learningRate = learningRate
+		local desiredOutputs = { reward }
+		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
 
-		learningRate = learningRate * DISCOUNT_RATE
+		reward = reward * REWARD_DISCOUNT
 	end
 
-	-- self.experimentationFactor = self.experimentationFactor * 0.9
+	self.experimentationFactor = self.experimentationFactor * EXPERIMENT_DECAY
 
 	self:save()
 
-	-- self.history = { }
+	self.history = { }
 end
 
 function Strategy:enact()
 	-- Enact latest plan
-	self.actions[self.history[#self.history].actionIndex].enact()
+	if #self.history > 0 then
+		self.actions[self.history[#self.history].actionIndex].enact()
+	end
 end
 
+local gNextSave = 0
 function Strategy:save()
-	for i,action in ipairs(self.actions) do
-		writeToFile(self.name..'-'..action.name..'.knowledge', self.networks[i]:save())
+	if getMachineTime() > gNextSave then
+		gNextSave = getMachineTime() + 10000
+		for i,action in ipairs(self.actions) do
+			writeToFile(self.name..'-'..action.name..'.knowledge', self.networks[i]:save())
+		end
 	end
 end
 

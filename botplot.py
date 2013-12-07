@@ -11,7 +11,7 @@ y = []
 i = 0
 
 def runningMeanFast(x, N):
-	return np.convolve(x, np.ones((N,))/N)[(N-1):]
+	return np.convolve(x, np.ones(N)/N)[:-N+1]
 
 while sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
   line = sys.stdin.readline()
@@ -48,6 +48,7 @@ while True:
 		graph2.set_ydata(runningMeanFast(y, 100))
 		graph3.set_xdata(x)
 		graph3.set_ydata(runningMeanFast(y, 1000))
+		plt.axis([i - 1000, i, 0.0, 1.0])
 		plt.draw()
 		plt.show()
 		plt.pause(3)

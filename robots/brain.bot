@@ -2,6 +2,7 @@ local Strategy = require('strategy')
 local RECORD_STATES = 20
 
 local VERBOSITY = 0
+local EXPERIMENT = true
 local function v(...)
 	if VERBOSITY >= 1 then
 		logprint(unpack(arg))
@@ -15,8 +16,16 @@ local function vv(...)
 end
 
 local argumentHandlers = {
-	verbose = function() VERBOSITY=1 end,
-	vverbose = function() VERBOSITY=2 end,
+	verbose = function() VERBOSITY=1 ; Strategy.verbosity = VERBOSITY end,
+	vverbose = function() VERBOSITY=2 ; Strategy.verbosity = VERBOSITY end,
+	experiment = function()
+		EXPERIMENT = not EXPERIMENT
+		if EXPERIMENT then
+			logprint('experiment on')
+		else
+			logprint('experiment off')
+		end
+	end
 }
 
 local deaths = 0
@@ -295,7 +304,7 @@ local STRATEGIES = {
 
 function main()
 	for i=1,#arg do
-		for k,handler in ipairs(argumentHandlers) do
+		for k,handler in pairs(argumentHandlers) do
 			if string.find(k, arg[i]) == 1 then
 				handler()
 			end
@@ -313,6 +322,7 @@ function onMsgReceived()
 	logprint('debugging!')
 end
 
+local gStrategyToTrain = 1
 function onScoreChanged(scoreChange, teamIndex, player) 
 
 	local reinforcement = 0
@@ -335,7 +345,7 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		table.remove(record, 1)
 	end
 
-	if reinforcement ~= 0 then
+	if EXPERIMENT and reinforcement ~= 0 then
 		v('kills '..kills)
 		v('deaths '..deaths)
 		local k, d = 0, 0
@@ -348,11 +358,18 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		end
 		local kdr = k / d
 		if kdr == math.huge then kdr = k end
-		writeToFile("record", tostring(kdr).."\n", true)
+		-- writeToFile("record", tostring(kdr).."\n", true)
 		vv(k/d)
 
-		for k,v in pairs(STRATEGIES) do
-			v:learn(reinforcement)
+		-- Only train one strategy at a time. Training more than one introduces
+		-- noise because the stratgy's performance (and therefore learning)
+		-- depends on the performance of all the strategies as a whole.
+		STRATEGIES[gStrategyToTrain]:learn(reinforcement)
+
+		-- move to the next strategy
+		gStrategyToTrain = gStrategyToTrain + 1
+		if gStrategyToTrain > #STRATEGIES then
+			gStrategyToTrain = 1
 		end
 	end
 end
@@ -368,14 +385,15 @@ function onTick(dt)
 	if clock > NEXT_PLAN_TIME then
 
 		local currentInputs = getInputs()
-		for k,v in pairs(STRATEGIES) do
-			v:plan(currentInputs)
+		for i,v in ipairs(STRATEGIES) do
+			-- Only allow experimentation for the strategy currently being trained
+			v:plan(currentInputs, EXPERIMENT and i == gStrategyToTrain)
 		end
 
 		NEXT_PLAN_TIME = clock + PLAN_INTERVAL
 	end
 
-	for k,v in pairs(STRATEGIES) do
+	for i,v in ipairs(STRATEGIES) do
 		v:enact()
 	end
 end
