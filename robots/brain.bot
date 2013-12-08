@@ -31,6 +31,7 @@ local argumentHandlers = {
 local deaths = 0
 local kills = 0
 local record = { }
+local recordrecord = { }
 
 local STATE = {
 	target = nil,
@@ -103,16 +104,22 @@ INPUTS = {
 			local projectiles = { }
 			bf:findAllObjectsInArea(projectiles, botPos + offset, botPos - offset, ObjType.Bullet, ObjType.Burst, ObjType.Seeker)
 
+			local me = bot:getPlayerInfo():getName()
 			local closest = math.huge
 			for _,projectile in pairs(projectiles) do
-				if projectile:getOwner():getName() ~= bot:getPlayerInfo():getName() then
+
+				local objType = projectile:getObjType()
+				if
+					projectile:getOwner():getName() ~= me or -- A projectile we don't own
+					objType == ObjType.Mine               or -- Any exploding type
+					objType == ObjType.Seeker             or
+					objType == ObjType.Burst
+				then
 					closest = math.min(closest, point.distSquared(projectile:getPos(), botPos))
 				end
 			end
 
-			if closest == math.huge then return 1.0 end
-
-			return closest / math.pow(STATE.personalSpace, 2)
+			return math.min(1.0, closest / math.pow(STATE.personalSpace, 2))
 		end
 	},
 
@@ -240,6 +247,22 @@ WEAPONS_ACTIONS = {
 	},
 
 	{
+		name = "triple",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local solution = bot:getFiringSolution(STATE.target)
+
+			if solution then
+				bot:setAngle(solution)
+				bot:fireWeapon(Weapon.Triple)
+			end
+		end
+	},
+
+	{
 		name = "burst",
 		enact = function()
 			if bot == nil or STATE.target == nil then
@@ -312,6 +335,8 @@ function main()
 	end
 	subscribe(Event.MsgReceived)
 	subscribe(Event.ScoreChanged)
+
+	bot:setLoadoutNow(Weapon.Phaser, Weapon.Triple, Weapon.Burst, Module.Shield, Module.Turbo)
 end
 
 function getName()
@@ -325,18 +350,18 @@ end
 local gStrategyToTrain = 1
 function onScoreChanged(scoreChange, teamIndex, player) 
 
-	local reinforcement = 0
+	local reinforcement = -1
 	if player == bot:getPlayerInfo() and scoreChange > 0 then
 		reinforcement = 1
 	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 or
 	       player == bot:getPlayerInfo() and scoreChange < 0 then
-		reinforcement = -1
+		reinforcement = 0
 	end
 
 	if reinforcement == 1 then
 		kills = kills + 1
 		table.insert(record, true)
-	elseif reinforcement == -1 then
+	elseif reinforcement == 0 then
 		deaths = deaths + 1
 		table.insert(record, false)
 	end
@@ -345,7 +370,7 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		table.remove(record, 1)
 	end
 
-	if EXPERIMENT and reinforcement ~= 0 then
+	if EXPERIMENT and reinforcement ~= -1 then
 		v('kills '..kills)
 		v('deaths '..deaths)
 		local k, d = 0, 0
@@ -358,7 +383,13 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		end
 		local kdr = k / d
 		if kdr == math.huge then kdr = k end
-		-- writeToFile("record", tostring(kdr).."\n", true)
+
+		table.insert(recordrecord, kdr)
+
+		if #recordrecord > RECORD_STATES then
+			writeToFile("record", table.concat(recordrecord,"\n").."\n", true)
+			recordrecord = { }
+		end
 		vv(k/d)
 
 		-- Only train one strategy at a time. Training more than one introduces

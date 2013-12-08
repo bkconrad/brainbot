@@ -36,8 +36,8 @@ local HIDDEN_LAYERS = 1.0
 local PLAN_STATES   = 30
 local RECORD_STATES = 3
 local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
-local EXPERIMENT_DECAY = .5^(1/5000)        -- Halflife of 1,000 turns
-local LEARNING_DECAY   = .5^(1/5000)
+local EXPERIMENT_DECAY = .5^(1/20000)        -- Halflife of 1,000 turns
+local LEARNING_DECAY   = .5^(1/20000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -139,7 +139,7 @@ function Strategy:learn(reward)
 
 	-- Evaluate old plans
 	local lastReward = reward
-	for i = #self.history,1,-1 do
+	for i = 1,#self.history,1 do
 
 		local phase = self.history[i]
 

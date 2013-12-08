@@ -87,30 +87,22 @@ function NeuralNetwork:backwardPropagate(inputs,desiredOutputs)
 	for i = getn(self),2,-1 do --iterate backwards (nothing to calculate for input layer)
 		local tempResults = {}
 		for j = 1,getn(self[i]) do
-			if desiredOutputs[j] ~= nil then
-				if i == getn(self) then --special calculations for output layer
-					self[i][j].delta = (desiredOutputs[j] - self[i][j].result) * self[i][j].result * (1 - self[i][j].result)
-				else
-					local weightDelta = 0
-					for k = 1,getn(self[i+1]) do
-						if desiredOutputs[k] ~= nil then
-							weightDelta = weightDelta + self[i+1][k][j]*self[i+1][k].delta
-						end
-					end
-					self[i][j].delta = self[i][j].result * (1 - self[i][j].result) * weightDelta
+			if i == getn(self) then --special calculations for output layer
+				self[i][j].delta = (desiredOutputs[j] - self[i][j].result) * self[i][j].result * (1 - self[i][j].result)
+			else
+				local weightDelta = 0
+				for k = 1,getn(self[i+1]) do
+					weightDelta = weightDelta + self[i+1][k][j]*self[i+1][k].delta
 				end
+				self[i][j].delta = self[i][j].result * (1 - self[i][j].result) * weightDelta
 			end
 		end
 	end
 	for i = 2,getn(self) do
 		for j = 1,getn(self[i]) do
-			if desiredOutputs[j] ~= nil then
-				self[i][j].bias = self[i][j].delta * self.learningRate
-				for k = 1,getn(self[i][j]) do
-					if desiredOutputs[k] ~= nil then
-						self[i][j][k] = self[i][j][k] + self[i][j].delta * self.learningRate * self[i-1][k].result
-					end
-				end
+			self[i][j].bias = self[i][j].delta * self.learningRate
+			for k = 1,getn(self[i][j]) do
+				self[i][j][k] = self[i][j][k] + self[i][j].delta * self.learningRate * self[i-1][k].result
 			end
 		end
 	end
