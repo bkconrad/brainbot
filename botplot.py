@@ -25,7 +25,7 @@ graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
 graph2 = plt.plot(x, runningMeanFast(y, 100), 'b', linewidth=2)[0]
 graph3 = plt.plot(x, runningMeanFast(y, 1000), 'r', linewidth=2)[0]
 
-# plt.ion()
+plt.ion()
 
 while True:
 	# If there's input ready, do something, else do something

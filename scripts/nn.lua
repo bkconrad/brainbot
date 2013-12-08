@@ -55,20 +55,21 @@ function NeuralNetwork:forewardPropagate(...)
 	local outputs = {}
 	for i = 1,getn(self) do
 		for j = 1,getn(self[i]) do
+			local neuron = self[i][j]
 			if i == 1 then
 				if type(arg[1]) == "table" then
-					self[i][j].result = arg[1][j]
+					neuron.result = arg[1][j]
 				else
-					self[i][j].result = arg[j]
+					neuron.result = arg[j]
 				end
 			else
-				self[i][j].result = self[i][j].bias
-				for k = 1,getn(self[i][j]) do
-					self[i][j].result = self[i][j].result + (self[i][j][k]*self[i-1][k].result)
+				neuron.result = neuron.bias
+				for k = 1,getn(neuron) do
+					neuron.result = neuron.result + (neuron[k]*self[i-1][k].result)
 				end
-				self[i][j].result = NeuralNetwork.transfer(self[i][j].result)
+				neuron.result = NeuralNetwork.transfer(neuron.result)
 				if i == getn(self) then
-					table.insert(outputs,self[i][j].result)
+					table.insert(outputs,neuron.result)
 				end
 			end
 		end
@@ -87,22 +88,24 @@ function NeuralNetwork:backwardPropagate(inputs,desiredOutputs)
 	for i = getn(self),2,-1 do --iterate backwards (nothing to calculate for input layer)
 		local tempResults = {}
 		for j = 1,getn(self[i]) do
+			local neuron = self[i][j]
 			if i == getn(self) then --special calculations for output layer
-				self[i][j].delta = (desiredOutputs[j] - self[i][j].result) * self[i][j].result * (1 - self[i][j].result)
+				neuron.delta = (desiredOutputs[j] - neuron.result) * neuron.result * (1 - neuron.result)
 			else
 				local weightDelta = 0
 				for k = 1,getn(self[i+1]) do
 					weightDelta = weightDelta + self[i+1][k][j]*self[i+1][k].delta
 				end
-				self[i][j].delta = self[i][j].result * (1 - self[i][j].result) * weightDelta
+				neuron.delta = neuron.result * (1 - neuron.result) * weightDelta
 			end
 		end
 	end
 	for i = 2,getn(self) do
 		for j = 1,getn(self[i]) do
-			self[i][j].bias = self[i][j].delta * self.learningRate
-			for k = 1,getn(self[i][j]) do
-				self[i][j][k] = self[i][j][k] + self[i][j].delta * self.learningRate * self[i-1][k].result
+			local neuron = self[i][j]
+			neuron.bias = neuron.delta * self.learningRate
+			for k = 1,getn(neuron) do
+				neuron[k] = neuron[k] + neuron.delta * self.learningRate * self[i-1][k].result
 			end
 		end
 	end
