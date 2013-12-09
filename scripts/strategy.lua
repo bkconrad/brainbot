@@ -36,8 +36,8 @@ local HIDDEN_LAYERS = 1.0
 local PLAN_STATES   = 30
 local RECORD_STATES = 3
 local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
-local EXPERIMENT_DECAY = .5^(1/20000)        -- Halflife of 1,000 turns
-local LEARNING_DECAY   = .5^(1/20000)
+local EXPERIMENT_DECAY = .5^(1/5000)        -- Halflife of 1,000 turns
+local LEARNING_DECAY   = .5^(1/5000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -67,7 +67,7 @@ function Strategy.create(name, numObservations, actions)
 			-- absorbing state such as dying or killing). The learning rate for
 			-- the training of each phase is equal to LEARNING_RATE^i where i is
 			-- the (positive) index of each phase relative to the most recent.
-			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, LEARNING_RATE))
+			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, 1.0))
 		end
 	end
 
@@ -75,7 +75,7 @@ function Strategy.create(name, numObservations, actions)
 	result.name = name
 	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
 	result.actions = actions
-	result.experimentationFactor = 0.1 -- Amount of experimentation to do
+	result.experimentationFactor = .5 -- Amount of experimentation to do
 
 	return result
 end
@@ -120,6 +120,7 @@ function Strategy:plan(observations, allowExperimentation)
 		startingInputs   = observations,    -- State when this action was chosen
 		actionIndex      = bestActionIndex, -- The chosen action
 		actionValue      = bestActionValue, -- The expected value of this action
+		reward           = 0
 	}
 
 	vv(self.actions[bestActionIndex].name)
@@ -131,6 +132,12 @@ function Strategy:plan(observations, allowExperimentation)
 	end
 end
 
+function Strategy:assess(reward)
+	if #self.history > 0 then
+		self.history[#self.history].reward = reward
+	end
+end
+
 function Strategy:learn(reward)
 	local relevance = 1
 	local learningRate = 1.0
@@ -139,16 +146,19 @@ function Strategy:learn(reward)
 
 	-- Evaluate old plans
 	local lastReward = reward
-	for i = 1,#self.history,1 do
+	local lastValue = 0
+	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
 
 		-- Reinforced reward
-		local desiredOutputs = { reward }
+		local desiredOutputs = { lastReward + REWARD_DISCOUNT * lastValue - phase.actionValue }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
 
-		reward = reward * REWARD_DISCOUNT
+		-- Store values for next iteration
+		lastReward = phase.reward
+		lastValue = phase.actionValue
 	end
 
 	self.experimentationFactor = self.experimentationFactor * EXPERIMENT_DECAY

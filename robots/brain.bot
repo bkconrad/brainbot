@@ -201,7 +201,7 @@ MOVEMENT_ACTIONS = {
 
 			if STATE.target and botPos and targetPos then
 				local offset = botPos - targetPos
-				bot:setThrustToPt(bot:getWaypoint(botPos + offset) or botPos)
+				bot:setThrustToPt(botPos + offset)
 			end
 		end
 	},
@@ -350,18 +350,18 @@ end
 local gStrategyToTrain = 1
 function onScoreChanged(scoreChange, teamIndex, player) 
 
-	local reinforcement = -1
+	local reinforcement = 0
 	if player == bot:getPlayerInfo() and scoreChange > 0 then
 		reinforcement = 1
 	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 or
 	       player == bot:getPlayerInfo() and scoreChange < 0 then
-		reinforcement = 0
+		reinforcement = -1
 	end
 
 	if reinforcement == 1 then
 		kills = kills + 1
 		table.insert(record, true)
-	elseif reinforcement == 0 then
+	elseif reinforcement == -1 then
 		deaths = deaths + 1
 		table.insert(record, false)
 	end
@@ -370,7 +370,7 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		table.remove(record, 1)
 	end
 
-	if EXPERIMENT and reinforcement ~= -1 then
+	if EXPERIMENT and reinforcement ~= 0 then
 		v('kills '..kills)
 		v('deaths '..deaths)
 		local k, d = 0, 0
@@ -405,6 +405,14 @@ function onScoreChanged(scoreChange, teamIndex, player)
 	end
 end
 
+function reward()
+	local result = (bot:getHealth() or 0) / 4
+	if STATE.target and STATE.target:getHealth() then
+		result = result + (1.0 - STATE.target:getHealth()) / 4
+	end
+	return result
+end
+
 local clock = 0
 function onTick(dt)
 	clock = clock + dt
@@ -418,6 +426,7 @@ function onTick(dt)
 		local currentInputs = getInputs()
 		for i,v in ipairs(STRATEGIES) do
 			-- Only allow experimentation for the strategy currently being trained
+			v:assess(reward())
 			v:plan(currentInputs, EXPERIMENT and i == gStrategyToTrain)
 		end
 

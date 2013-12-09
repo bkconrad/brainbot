@@ -2,6 +2,7 @@ ACTIVATION_RESPONSE = 1
 
 NeuralNetwork = {
 	transfer = function(x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
+	-- transfer = function(x) local tmp = math.exp(2*x) ; return (tmp - 1)/(tmp + 1) end --This is the Transfer function (in this case a sigmoid)
 }
 
 function getn(t)
