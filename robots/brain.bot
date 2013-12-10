@@ -7,7 +7,7 @@ local function say(...)
 end
 
 local VERBOSITY = 0
-local EXPERIMENT = true
+local EXPERIMENTATION = 0.5
 local function v(...)
 	if VERBOSITY >= 1 then
 		logprint(unpack(arg))
@@ -22,20 +22,29 @@ end
 
 local argumentHandlers = {
 	verbose = function(val)
-		VERBOSITY = val or 1
+		VERBOSITY = tonumber(val) or 1
 		Strategy.verbosity = VERBOSITY
 		say('verbosity: ' .. VERBOSITY)
 	end,
 
 	vverbose = function()
-		VERBOSITY = val or 2
+		VERBOSITY = tonumber(val) or 2
 		Strategy.verbosity = VERBOSITY
 		say('verbosity: ' .. VERBOSITY)
 	end,
 
-	experiment = function(val)
-		EXPERIMENT = val or not EXPERIMENT
-		say('experiment: ' .. tostring(EXPERIMENT))
+	experimentation = function(val)
+		if val == nil then
+			if EXPERIMENTATION == 1.0 then
+				EXPERIMENTATION = 0.0
+			else
+				EXPERIMENTATION = 1.0
+			end
+		else
+			EXPERIMENTATION = tonumber(val) or 0.0
+		end
+
+		say('experimentation: ' .. tostring(EXPERIMENTATION))
 	end,
 
 	debug = function()
@@ -372,7 +381,7 @@ function onMsgReceived(msg, player, global)
 			table.insert(arguments, s)
 		end)
 
-		local command = arguments[1]
+		local command = table.remove(arguments, 1)
 		for k,handler in pairs(argumentHandlers) do
 			if string.find(k, command) == 1 then
 				handler(unpack(arguments))
@@ -404,7 +413,7 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		table.remove(record, 1)
 	end
 
-	if EXPERIMENT and reinforcement ~= 0 then
+	if EXPERIMENTATION > 0 and reinforcement ~= 0 then
 		v('kills '..kills)
 		v('deaths '..deaths)
 		local k, d = 0, 0
@@ -461,7 +470,15 @@ function onTick(dt)
 		for i,v in ipairs(STRATEGIES) do
 			-- Only allow experimentation for the strategy currently being trained
 			v:assess(reward())
-			v:plan(currentInputs, EXPERIMENT and i == gStrategyToTrain)
+
+			-- Plan the new strategy
+			if i == gStrategyToTrain then
+				-- We only experiment with the strategy we're training
+				v:plan(currentInputs, EXPERIMENTATION)
+			else
+				-- Otherwise we just follow the strategy
+				v:plan(currentInputs, 0.0)
+			end
 		end
 
 		NEXT_PLAN_TIME = clock + PLAN_INTERVAL

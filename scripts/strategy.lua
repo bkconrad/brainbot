@@ -36,19 +36,21 @@ local HIDDEN_LAYERS = 1.0
 local PLAN_STATES   = 30
 local RECORD_STATES = 3
 local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
-local EXPERIMENT_DECAY = .5^(1/5000)        -- Halflife of 1,000 turns
 local LEARNING_DECAY   = .5^(1/5000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
 	result.networks = { }
+	result.uncertaintyNetworks = { }
 
 	-- Load or create neural networks
 	for i,action in ipairs(actions) do
-		local data = readFromFile(name..'-'..action.name..'.knowledge')
-		if data ~= '' then
+		local knowledgeData = readFromFile(name..'-'..action.name..'.knowledge')
+		local uncertaintyData = readFromFile(name..'-'..action.name..'.uncertainty')
+		if knowledgeData ~= '' and uncertaintyData ~= '' then
 			v('Loading '..name)
-			table.insert(result.networks, NeuralNetwork.load(data))
+			table.insert(result.networks, NeuralNetwork.load(knowledgeData))
+			table.insert(result.uncertaintyNetworks, NeuralNetwork.load(uncertaintyData))
 		else
 
 			-- The Q Value networks. There is one network per action. These are
@@ -67,52 +69,64 @@ function Strategy.create(name, numObservations, actions)
 			-- absorbing state such as dying or killing). The learning rate for
 			-- the training of each phase is equal to LEARNING_RATE^i where i is
 			-- the (positive) index of each phase relative to the most recent.
-			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + #actions + 1) / 2, 1.0))
+			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + 1) / 2, 1.0))
+
+			-- The uncertainty networks. There is again one per action, however
+			-- these networks are trained in a different manner than the Q value
+			-- networks. Uncertainty networks are initialized to 1.0,
+			-- representing complete uncertainty regarding their effects. As
+			-- each state is assessed, the uncertainty network for the selected
+			-- action is trained towards zero. This has the effect of reducing
+			-- the uncertainty regarding the action's value in the given state.
+			-- 
+			-- Some record of state-action pairs is commonly used in Q learning
+			-- to intelligently decide which action to take when experiment.
+			-- Once we are fairly certain of an action's value in the current
+			-- state, we will no longer experiment with it. In the common
+			-- (discreet) implementation of Q learning, this is implemented as a
+			-- lookup of table mapping state-actions to counts. Because of the
+			-- continuous state space, we choose to use a neural network in this
+			-- case as well.
+			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + 1) / 2, 0.5))
+			result.uncertaintyNetworks[#result.uncertaintyNetworks]:setWeights(0.5)
 		end
 	end
 
-
 	result.name = name
-	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
 	result.actions = actions
-	result.experimentationFactor = .5 -- Amount of experimentation to do
+	result.history = { } -- {actionIndex = bestActionIndex, actionConfidence = bestActionConfidence, startingInputs = observations }
 
 	return result
 end
 
-function Strategy:plan(observations, allowExperimentation)
+function Strategy:plan(observations, experimentation)
 
-	local bestActionIndex = 1
-	local bestActionValue = 0
-
-	if allowExperimentation == nil then
-		allowExperimentation = true
+	if experimentation == nil then
+		experimentation = 1.0
 	end
 
-	if allowExperimentation and math.random() < self.experimentationFactor then
-		-- Randomly select an action to take -- this is essential to the
-		-- learning process because it eliminates the possibility that there is
-		-- something better we could be doing
-		bestActionIndex = math.random(1, #self.actions)
+	-- Carefully plan our next move by comparing the expected value of each
+	-- action in the current state
+	vv(self.name..' planning:')
 
-		-- Expected value of taking this action in the given state
-		bestActionValue = self.networks[bestActionIndex]:forewardPropagate(observations)[1]
-	else
-		-- Carefully plan our next move by comparing the expected value of each
-		-- action in the current state
-		vv(self.name..' planning:')
+	-- Pick the best action according to our policy and experimentation settings
+	local bestActionIndex = 1
+	local bestActionValue = 0
+	for i,action in ipairs(self.actions) do
 
-		for i,action in ipairs(self.actions) do
+		-- Get the expected value of taking this action in the given state
+		local value = self.networks[i]:forewardPropagate(observations)[1]
+		vv(self.actions[i].name..': '..tostring(value))
 
-			-- Expected value of taking this action in the given state
-			local value = self.networks[i]:forewardPropagate(observations)[1]
-			vv(self.actions[i].name..': '..tostring(value))
+		-- Add a bonus to actions with high uncertainty regarding their effects
+		if experimentation > 0 then
+			value = value + experimentation * self.uncertaintyNetworks[i]:forewardPropagate(observations)[1]
+		end
 
-			-- Keep the best action
-			if value > bestActionValue then
-				bestActionIndex = i
-				bestActionValue = value
-			end
+		-- Keep the best action
+		if value > bestActionValue then
+			bestActionIndex = i
+			bestActionValue = value
 		end
 	end
 
@@ -155,13 +169,12 @@ function Strategy:learn(reward)
 		local desiredOutputs = { lastReward + REWARD_DISCOUNT * lastValue - phase.actionValue }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
+		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { 0 })
 
 		-- Store values for next iteration
 		lastReward = phase.reward
 		lastValue = phase.actionValue
 	end
-
-	self.experimentationFactor = self.experimentationFactor * EXPERIMENT_DECAY
 
 	self:save()
 
@@ -181,6 +194,7 @@ function Strategy:save()
 		gNextSave = getMachineTime() + 10000
 		for i,action in ipairs(self.actions) do
 			writeToFile(self.name..'-'..action.name..'.knowledge', self.networks[i]:save())
+			writeToFile(self.name..'-'..action.name..'.uncertainty', self.uncertaintyNetworks[i]:save())
 		end
 	end
 end

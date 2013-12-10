@@ -228,4 +228,15 @@ function NeuralNetwork.load( data)
 	return network
 end
 
+function NeuralNetwork:setWeights(weight)
+	for i = 1,getn(self) do
+		for j = 1,getn(self[i]) do
+			self[i][j].bias = 1.0
+			for k = 1,getn(self[i][j]) do
+				self[i][j][k] = weight
+			end
+		end
+	end
+end
+
 return NeuralNetwork
