@@ -1,6 +1,11 @@
 local Strategy = require('strategy')
 local RECORD_STATES = 20
 
+local function say(...)
+	logprint(unpack(arg))
+	bot:globalMsg(table.concat(arg, ' '))
+end
+
 local VERBOSITY = 0
 local EXPERIMENT = true
 local function v(...)
@@ -16,16 +21,27 @@ local function vv(...)
 end
 
 local argumentHandlers = {
-	verbose = function() VERBOSITY=1 ; Strategy.verbosity = VERBOSITY end,
-	vverbose = function() VERBOSITY=2 ; Strategy.verbosity = VERBOSITY end,
-	experiment = function()
-		EXPERIMENT = not EXPERIMENT
-		if EXPERIMENT then
-			logprint('experiment on')
-		else
-			logprint('experiment off')
-		end
-	end
+	verbose = function(val)
+		VERBOSITY = val or 1
+		Strategy.verbosity = VERBOSITY
+		say('verbosity: ' .. VERBOSITY)
+	end,
+
+	vverbose = function()
+		VERBOSITY = val or 2
+		Strategy.verbosity = VERBOSITY
+		say('verbosity: ' .. VERBOSITY)
+	end,
+
+	experiment = function(val)
+		EXPERIMENT = val or not EXPERIMENT
+		say('experiment: ' .. tostring(EXPERIMENT))
+	end,
+
+	debug = function()
+		dbg()
+		say('debugging')
+	end,
 }
 
 local deaths = 0
@@ -333,6 +349,7 @@ function main()
 			end
 		end
 	end
+
 	subscribe(Event.MsgReceived)
 	subscribe(Event.ScoreChanged)
 
@@ -343,8 +360,25 @@ function getName()
 	return 'BrainBot'
 end
 
-function onMsgReceived()
-	logprint('debugging!')
+function onMsgReceived(msg, player, global)
+	if string.find(msg, '!') then
+
+		-- Consume the exclamation point
+		msg = string.sub(msg, 2)
+
+		-- Split arguments into a table
+		local arguments = { }
+		string.gsub(msg, "(%w+)", function(s)
+			table.insert(arguments, s)
+		end)
+
+		local command = arguments[1]
+		for k,handler in pairs(argumentHandlers) do
+			if string.find(k, command) == 1 then
+				handler(unpack(arguments))
+			end
+		end
+	end
 end
 
 local gStrategyToTrain = 1
