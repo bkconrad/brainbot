@@ -53,10 +53,7 @@ local argumentHandlers = {
 	end,
 }
 
-local deaths = 0
-local kills = 0
 local record = { }
-local recordrecord = { }
 
 local STATE = {
 	target = nil,
@@ -401,39 +398,12 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		reinforcement = -1
 	end
 
-	if reinforcement == 1 then
-		kills = kills + 1
-		table.insert(record, true)
-	elseif reinforcement == -1 then
-		deaths = deaths + 1
-		table.insert(record, false)
-	end
-
-	if #record > RECORD_STATES then
-		table.remove(record, 1)
-	end
-
-	if EXPERIMENTATION > 0 and reinforcement ~= 0 then
-		v('kills '..kills)
-		v('deaths '..deaths)
-		local k, d = 0, 0
-		for i,v in ipairs(record) do
-			if v then
-				k = k + 1
-			else
-				d = d + 1
-			end
+	if reinforcement ~= 0 then
+		table.insert(record, reinforcement)
+		if #record > RECORD_STATES then
+			writeToFile("record", table.concat(record,"\n").."\n", true)
+			record = { }
 		end
-		local kdr = k / d
-		if kdr == math.huge then kdr = k end
-
-		table.insert(recordrecord, kdr)
-
-		if #recordrecord > RECORD_STATES then
-			writeToFile("record", table.concat(recordrecord,"\n").."\n", true)
-			recordrecord = { }
-		end
-		vv(k/d)
 
 		-- Only train one strategy at a time. Training more than one introduces
 		-- noise because the stratgy's performance (and therefore learning)

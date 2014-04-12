@@ -112,6 +112,7 @@ function Strategy:plan(observations, experimentation)
 	-- Pick the best action according to our policy and experimentation settings
 	local bestActionIndex = 1
 	local bestActionValue = 0
+	local bestActionValueWithBonus = 0
 	for i,action in ipairs(self.actions) do
 
 		-- Get the expected value of taking this action in the given state
@@ -119,14 +120,16 @@ function Strategy:plan(observations, experimentation)
 		vv(self.actions[i].name..': '..tostring(value))
 
 		-- Add a bonus to actions with high uncertainty regarding their effects
+		local valueWithBonus = value
 		if experimentation > 0 then
-			value = value + experimentation * self.uncertaintyNetworks[i]:forewardPropagate(observations)[1]
+			valueWithBonus = valueWithBonus + experimentation * self.uncertaintyNetworks[i]:forewardPropagate(observations)[1]
 		end
 
 		-- Keep the best action
-		if value > bestActionValue then
+		if valueWithBonus > bestActionValueWithBonus then
 			bestActionIndex = i
 			bestActionValue = value
+			bestActionValueWithBonus = valueWithBonus
 		end
 	end
 
@@ -166,7 +169,7 @@ function Strategy:learn(reward)
 		local phase = self.history[i]
 
 		-- Reinforced reward
-		local desiredOutputs = { lastReward + REWARD_DISCOUNT * lastValue - phase.actionValue }
+		local desiredOutputs = { lastReward + REWARD_DISCOUNT * lastValue }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
 		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { 0 })

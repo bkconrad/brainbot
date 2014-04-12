@@ -7,13 +7,13 @@ import sys
 import time
 
 # calculates the running mean of x using N samples
-def running_mean_fast(x, N):
-	return np.convolve(x, np.ones(N)/N)[N-1:]
+def running_sum_fast(x, N):
+	return np.convolve(x, np.ones(N))[N-1:]
 
 # argument parsing
 parser = argparse.ArgumentParser(description='Visualize BrainBot data')
 parser.add_argument('--file', '-f', help="the output file to operate on")
-parser.add_argument('--no-update', '-n', action='store_true', help="do not update or redraw the graph")
+parser.add_argument('--no-fitting', '-n', action='store_true', help="do not refit axis to latest data")
 
 args = parser.parse_args()
 
@@ -33,14 +33,9 @@ with open(filename, 'r+', 1) as record_file:
 		i += 1
 
 	# set up our graphs
-	graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
-	graph2 = plt.plot(x[:-100], running_mean_fast(y, 100)[:-100],    'b', linewidth=2)[0]
-	graph3 = plt.plot(x[:-1000], running_mean_fast(y, 1000)[:-1000], 'r', linewidth=2)[0]
-
-	# when --no-update is specified we just display and exit
-	if args.no_update:
-		plt.show()
-		exit()
+	# graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
+	graph2 = plt.plot(x[:-100], running_sum_fast(y, 100)[:-100],    'b.', linewidth=1)[0]
+	graph3 = plt.plot(x[:-1000], running_sum_fast(y, 1000)[:-1000], 'r.', linewidth=1)[0]
 
 	# turn on 'interactive' mode and loop until exit
 	plt.ion()
@@ -56,15 +51,16 @@ with open(filename, 'r+', 1) as record_file:
 			i += 1
 
 		# update the graph data
-		graph1.set_xdata(x)
-		graph1.set_ydata(y)
+		# graph1.set_xdata(x)
+		# graph1.set_ydata(y)
 		graph2.set_xdata(x[:-100])
-		graph2.set_ydata(running_mean_fast(y, 100)[:-100])
+		graph2.set_ydata(running_sum_fast(y, 100)[:-100])
 		graph3.set_xdata(x[:-1000])
-		graph3.set_ydata(running_mean_fast(y, 1000)[:-1000])
+		graph3.set_ydata(running_sum_fast(y, 1000)[:-1000])
 
 		# set the axis to inclue the last 2000 data points
-		plt.axis([i - 2000, i, 0.0, 1.5])
+		if not args.no_fitting:
+			plt.axis([i - 2000, i, -100, 100])
 
 		# draw the graph and pause for three seconds
 		plt.draw()
