@@ -25,7 +25,15 @@ function stage() {
 		echo "Staging $SCRIPTDIR/$1/$base to $DESTDIR/$1/$base"
 		ln -s $SCRIPTDIR/$1/$base $DESTDIR/$1/$base
 	done
+	for file in $(find $SCRIPTDIR/$1 -name '*.levelgen')
+	do
+		base=$(basename $file)
+		rm $DESTDIR/$1/$base 2>/dev/null
+		echo "Staging $SCRIPTDIR/$1/$base to $DESTDIR/$1/$base"
+		ln -s $SCRIPTDIR/$1/$base $DESTDIR/$1/$base
+	done
 }
 
 stage robots
 stage scripts
+stage levels

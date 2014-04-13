@@ -23,7 +23,7 @@ y = []
 i = 0
 
 # open our record file
-filename = args.file or '/home/kaen/code/bitfighter-hg/exe/screenshots/record'
+filename = args.file or '/home/kaen/code/bitfighter/exe/screenshots/record'
 with open(filename, 'r+', 1) as record_file:
 
 	# read initial data
@@ -34,8 +34,8 @@ with open(filename, 'r+', 1) as record_file:
 
 	# set up our graphs
 	# graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
-	graph2 = plt.plot(x[:-100], running_sum_fast(y, 100)[:-100],    'b.', linewidth=1)[0]
-	graph3 = plt.plot(x[:-1000], running_sum_fast(y, 1000)[:-1000], 'r.', linewidth=1)[0]
+	graph2 = plt.plot(x[:-100], running_sum_fast(y, 100)[:-100],    'b', linewidth=1)[0]
+	graph3 = plt.plot(x[:-1000], running_sum_fast(y, 1000)[:-1000], 'r', linewidth=1)[0]
 
 	# turn on 'interactive' mode and loop until exit
 	plt.ion()

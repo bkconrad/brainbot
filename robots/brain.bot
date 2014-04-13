@@ -1,5 +1,5 @@
 local Strategy = require('strategy')
-local RECORD_STATES = 20
+local RECORD_STATES = 1
 
 local function say(...)
 	logprint(unpack(arg))
@@ -7,7 +7,7 @@ local function say(...)
 end
 
 local VERBOSITY = 0
-local EXPERIMENTATION = 0.5
+local EXPERIMENTATION = 0.2
 local function v(...)
 	if VERBOSITY >= 1 then
 		logprint(unpack(arg))
@@ -21,6 +21,10 @@ local function vv(...)
 end
 
 local argumentHandlers = {
+	clone = function(id)
+		loadStrategies(id)
+	end,
+
 	verbose = function(val)
 		VERBOSITY = tonumber(val) or 1
 		Strategy.verbosity = VERBOSITY
@@ -175,12 +179,6 @@ INPUTS = {
 
 TARGETTING_ACTIONS = {
 	{
-		name = "nothing",
-		enact = function()
-		end
-	},
-
-	{
 		name = "target",
 		enact = function()
 			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
@@ -207,6 +205,26 @@ MOVEMENT_ACTIONS = {
 
 			if STATE.target and targetPos then
 				bot:setThrustToPt(bot:getWaypoint(targetPos) or botPos)
+			end
+		end
+	},
+
+	{
+		name = "engage",
+		enact = function()
+			if bot == nil or STATE.target == nil then
+				return
+			end
+
+			local targetPos = STATE.target:getPos()
+
+			if STATE.target and targetPos then
+				if STATE.personalSpace * STATE.personalSpace < point.distSquared(targetPos, bot:getPos()) then
+					bot:setThrustToPt(bot:getWaypoint(targetPos))
+				else
+					local offset = targetPos - bot:getPos()
+					bot:setThrustToPt(bot:getWaypoint(bot:getPos() - offset) or bot:getPos())
+				end
 			end
 		end
 	},
@@ -357,7 +375,7 @@ function main()
 	end
 
 	subscribe(Event.MsgReceived)
-	subscribe(Event.ScoreChanged)
+	subscribe(Event.ShipKilled)
 
 	bot:setLoadoutNow(Weapon.Phaser, Weapon.Triple, Weapon.Burst, Module.Shield, Module.Turbo)
 end
@@ -387,18 +405,20 @@ function onMsgReceived(msg, player, global)
 	end
 end
 
-local gStrategyToTrain = 1
-function onScoreChanged(scoreChange, teamIndex, player) 
+local gStrategyToTrain = math.random(1, #STRATEGIES)
+function onShipKilled(ship, x, shooter) 
 
+	local player = ship:getPlayerInfo()
 	local reinforcement = 0
-	if player == bot:getPlayerInfo() and scoreChange > 0 then
-		reinforcement = 1
-	elseif player ~= bot:getPlayerInfo() and scoreChange > 0 or
-	       player == bot:getPlayerInfo() and scoreChange < 0 then
+	if player == bot:getPlayerInfo() then
 		reinforcement = -1
+	elseif bot:getPlayerInfo() == shooter:getPlayerInfo() then
+		reinforcement = 1
 	end
 
+
 	if reinforcement ~= 0 then
+		logprint(reinforcement)
 		table.insert(record, reinforcement)
 		if #record > RECORD_STATES then
 			writeToFile("record", table.concat(record,"\n").."\n", true)
@@ -411,7 +431,7 @@ function onScoreChanged(scoreChange, teamIndex, player)
 		STRATEGIES[gStrategyToTrain]:learn(reinforcement)
 
 		-- move to the next strategy
-		gStrategyToTrain = gStrategyToTrain + 1
+		gStrategyToTrain = math.random(1, #STRATEGIES)
 		if gStrategyToTrain > #STRATEGIES then
 			gStrategyToTrain = 1
 		end
@@ -419,9 +439,9 @@ function onScoreChanged(scoreChange, teamIndex, player)
 end
 
 function reward()
-	local result = (bot:getHealth() or 0) / 4
+	local result = (bot:getHealth() or 0) / 4 / 3
 	if STATE.target and STATE.target:getHealth() then
-		result = result + (1.0 - STATE.target:getHealth()) / 4
+		result = result + (1.0 - STATE.target:getHealth()) / 4 / 3 * 2
 	end
 	return result
 end

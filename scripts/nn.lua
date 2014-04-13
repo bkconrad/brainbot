@@ -47,7 +47,7 @@ function NeuralNetwork.create( _numInputs, _numOutputs, _numHiddenLayers, _neuro
 	return network
 end
 	
-function NeuralNetwork:forewardPropagate(...)
+function NeuralNetwork:forewardPropagate(arg)
 	if #arg ~= #self[1] and type(arg[1]) ~= "table" then
 		error("Neural Network received "..#arg.." input[s] (expected "..#self[1].." input[s])",2)
 	elseif type(arg[1]) == "table" and getn(arg[1]) ~= getn(self[1]) then
