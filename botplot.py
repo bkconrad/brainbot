@@ -5,6 +5,7 @@ import argparse
 import os
 import sys
 import time
+import re
 
 # calculates the running mean of x using N samples
 def running_sum_fast(x, N):
@@ -22,20 +23,56 @@ x = []
 y = []
 i = 0
 
+streams = { }
+
+def parseChunk(chunk):
+	
+	for match in re.finditer('\w+:\n(?:-[^\n]*\n)*', chunk):
+
+		subchunk = match.group(0)
+
+		print('***')
+		print(subchunk)
+
+		channels = subchunk.split('- ')
+
+		# get the stream name and consume it
+		streamName = channels[0].replace(':', '')
+		del channels[0]
+
+		print(streamName)
+
+		if not streams.get(streamName):
+			streams[streamName] = { }
+			streams[streamName]['axes'] = plt.subplot(3, 2, len(streams.keys()))
+			streams[streamName]['axes'].set_title(streamName)
+
+		stream = streams[streamName]
+
+		for channel in channels:
+			name, value = channel.split(': ')
+
+			if not stream.get(name):
+				stream[name] = { }
+				stream[name]['line'] = plt.plot([], [])[0]
+				stream[name]['data'] = []
+				stream[name]['line'].set_label(name)
+				plt.legend(loc='lower left', fontsize='small')
+
+			stream[name]['data'].append(float(value))
+			stream[name]['line'].set_xdata(range(len(stream[name]['data'])))
+			stream[name]['line'].set_ydata(stream[name]['data'])
+			xmax = len(stream[name]['data'])
+			stream['axes'].set_xlim(xmax - 100, xmax)
+
 # open our record file
-filename = args.file or '/home/kaen/code/bitfighter/exe/screenshots/record'
+filename = args.file or '/home/kaen/code/bitfighter/exe/screenshots/reporting'
 with open(filename, 'r+', 1) as record_file:
 
-	# read initial data
-	for line in record_file:
-		y.append(float(line))
-		x.append(i)
-		i += 1
+	plt.plot()
 
-	# set up our graphs
-	# graph1 = plt.plot(x, y, 'k.', markersize=1)[0]
-	graph2 = plt.plot(x[:-100], running_sum_fast(y, 100)[:-100],    'b', linewidth=1)[0]
-	graph3 = plt.plot(x[:-1000], running_sum_fast(y, 1000)[:-1000], 'r', linewidth=1)[0]
+	# parse initial data
+	parseChunk(record_file.read())
 
 	# turn on 'interactive' mode and loop until exit
 	plt.ion()
@@ -44,23 +81,11 @@ with open(filename, 'r+', 1) as record_file:
 		# seek to the current position to clear the file's readahead buffer
 		record_file.seek(0, os.SEEK_CUR)
 
-		# read all new data from the file
-		for line in record_file:
-			y.append(float(line))
-			x.append(i)
-			i += 1
-
-		# update the graph data
-		# graph1.set_xdata(x)
-		# graph1.set_ydata(y)
-		graph2.set_xdata(x[:-100])
-		graph2.set_ydata(running_sum_fast(y, 100)[:-100])
-		graph3.set_xdata(x[:-1000])
-		graph3.set_ydata(running_sum_fast(y, 1000)[:-1000])
+		parseChunk(record_file.read())
 
 		# set the axis to inclue the last 2000 data points
-		if not args.no_fitting:
-			plt.axis([i - 2000, i, -100, 100])
+		# if not args.no_fitting:
+		# 	plt.axis([i - 2000, i, -100, 100])
 
 		# draw the graph and pause for three seconds
 		plt.draw()

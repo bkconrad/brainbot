@@ -1,6 +1,14 @@
 local NeuralNetwork = require('nn')
 local Strategy = { verbosity = 0 }
 
+local function report(name, data)
+	local result = name .. ":\n"
+	for k,v in pairs(data) do
+		result = result .. "- " .. tostring(k) .. ": " .. tostring(v) .. "\n"
+	end
+	writeToFile('reporting', result, true)
+end
+
 local function v(...)
 	if Strategy.verbosity >= 1 then
 		logprint(...)
@@ -115,11 +123,12 @@ function Strategy:plan(observations, experimentation)
 	local bestActionIndex = 1
 	local bestActionValue = 0
 	local bestActionValueWithBonus = 0
+	local actionReport = { }
 	for i,action in ipairs(self.actions) do
 
 		-- Get the expected value of taking this action in the given state
 		local value = self.networks[i]:forewardPropagate(observations)[1]
-		vv(self.actions[i].name..': '..tostring(value))
+		actionReport[action.name] = value
 
 		-- Add a bonus to actions with high uncertainty regarding their effects
 		local valueWithBonus = value
@@ -141,6 +150,8 @@ function Strategy:plan(observations, experimentation)
 		actionValue      = bestActionValue, -- The expected value of this action
 		reward           = 0
 	}
+
+	report(self.name, actionReport)
 
 	vv(self.actions[bestActionIndex].name)
 	vv()
@@ -171,7 +182,7 @@ function Strategy:learn(reward)
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
-		local thisReward = phase.reward + REWARD_DISCOUNT * lastReward
+		local thisReward = phase.reward + (1 / REWARD_DISCOUNT) * lastReward
 
 		-- Reinforced reward
 		local desiredOutputs = { thisReward + lastValue - phase.actionValue }
