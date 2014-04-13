@@ -31,16 +31,11 @@ def parseChunk(chunk):
 
 		subchunk = match.group(0)
 
-		print('***')
-		print(subchunk)
-
 		channels = subchunk.split('- ')
 
 		# get the stream name and consume it
 		streamName = channels[0].replace(':', '')
 		del channels[0]
-
-		print(streamName)
 
 		if not streams.get(streamName):
 			streams[streamName] = { }
