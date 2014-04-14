@@ -184,7 +184,7 @@ function Strategy:learn(reward)
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
-		local thisReward = phase.reward + (1 / REWARD_DISCOUNT) * lastReward
+		local thisReward = phase.reward + REWARD_DISCOUNT * lastReward
 
 		-- Reinforced reward
 		local desiredOutputs = { thisReward + lastValue - phase.actionValue }
