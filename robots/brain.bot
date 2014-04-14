@@ -146,7 +146,11 @@ INPUTS = {
 					objType == ObjType.Seeker             or
 					objType == ObjType.Burst
 				then
-					closest = math.min(closest, point.distSquared(projectile:getPos(), botPos))
+					local distSquared = point.distSquared(projectile:getPos(), botPos)
+					if distSquared < closest then
+						closest = distSquared
+						STATE.closestDangerousProjectile = projectile
+					end
 				end
 			end
 
@@ -247,6 +251,23 @@ MOVEMENT_ACTIONS = {
 			if STATE.target and botPos and targetPos then
 				local offset = botPos - targetPos
 				bot:setThrustToPt(botPos + offset)
+			end
+		end
+	},
+
+	{
+		name = "evade",
+		enact = function()
+			if not bot or not STATE.closestDangerousProjectile then
+				return
+			end
+
+			local botPos = bot:getPos()
+			local projectilePos = STATE.closestDangerousProjectile:getPos()
+
+			if botPos and projectilePos then
+				local offset = botPos - projectilePos
+				bot:setThrustToPt(botPos - offset)
 			end
 		end
 	},
