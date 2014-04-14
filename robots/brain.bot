@@ -55,6 +55,11 @@ local argumentHandlers = {
 		dbg()
 		say('debugging')
 	end,
+
+	report = function()
+		Strategy.report = true
+		say('reporting')
+	end
 }
 
 local record = { }

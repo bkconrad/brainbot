@@ -1,12 +1,14 @@
 local NeuralNetwork = require('nn')
-local Strategy = { verbosity = 0 }
+local Strategy = { verbosity = 0, report = false }
 
 local function report(name, data)
-	local result = name .. ":\n"
-	for k,v in pairs(data) do
-		result = result .. "- " .. tostring(k) .. ": " .. tostring(v) .. "\n"
+	if Strategy.report then
+		local result = name .. ":\n"
+		for k,v in pairs(data) do
+			result = result .. "- " .. tostring(k) .. ": " .. tostring(v) .. "\n"
+		end
+		writeToFile('reporting', result, true)
 	end
-	writeToFile('reporting', result, true)
 end
 
 local function v(...)
