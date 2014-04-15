@@ -99,7 +99,7 @@ function Strategy.create(name, numObservations, actions)
 			-- lookup of table mapping state-actions to counts. Because of the
 			-- continuous state space, we choose to use a neural network in this
 			-- case as well.
-			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, 0, (numObservations + 1), UNCERTAINTY_LEARNING_RATE))
+			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, 1, (numObservations + 1), UNCERTAINTY_LEARNING_RATE))
 			-- result.uncertaintyNetworks[#result.uncertaintyNetworks]:setWeights(1.0)
 		end
 	end
