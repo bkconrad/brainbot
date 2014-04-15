@@ -1,3 +1,80 @@
+diff -r abe1c5a72b1b bitfighter_test/TestBotFight.cpp
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/bitfighter_test/TestBotFight.cpp	Mon Apr 14 20:29:30 2014 -0700
+@@ -0,0 +1,73 @@
++//------------------------------------------------------------------------------
++// Copyright Chris Eykamp
++// See LICENSE.txt for full copyright information
++//------------------------------------------------------------------------------
++
++#include "TestUtils.h"
++#include "../zap/ClientGame.h"
++#include "../zap/ServerGame.h"
++#include "../zap/gameType.h"
++#include "../zap/luaLevelGenerator.h"
++#include "gtest/gtest.h"
++
++namespace Zap
++{
++
++using namespace std;
++using namespace TNL;
++
++TEST(BotfightTest, botFight)
++{
++	while(true) {
++		GamePair gamePair("GameType 100 100\n\
++	LevelCredits \n\
++	GridSize 255\n\
++	Team Blue 0 0 1\n\
++	Specials\n\
++	MinPlayers\n\
++	MaxPlayers\n\
++	BarrierMaker 50 -3.5 0 -3 0\n\
++	BarrierMaker 50 3.5 0 3 0\n\
++	BarrierMaker 50 0 -3.5 0 -3\n\
++	BarrierMaker 50 -3 -0.5 -3 0.5\n\
++	BarrierMaker 50 3 -0.5 3 0.5\n\
++	BarrierMaker 50 -4.5 0 -4.5 -0.5 -3.5 -1.5 -3 -1.5 -1.5 -3 -1.5 -3.5 -0.5 -4.5 0.5 -4.5 1.5 -3.5 1.5 -3 3 -1.5 3.5 -1.5 4.5 -0.5 4.5 0.5 3.5 1.5 3 1.5 1.5 3 1.5 3.5 0.5 4.5 -0.5 4.5 -1.5 3.5 -1.5 3 -3 1.5 -3.5 1.5 -4.5 0.5 -4.5 -0.5\n\
++	BarrierMaker 50 -0.5 -3 0.5 -3\n\
++	BarrierMaker 50 0 3.5 0 3\n\
++	BarrierMaker 50 -0.5 3 0.5 3\n\
++	BarrierMaker 200 -1.5 -1.5 1.5 1.5\n\
++	BarrierMaker 200 1.5 -1.5 -1.5 1.5\n\
++	RepairItem 0 -4 45\n\
++	RepairItem 0 4 45\n\
++	RepairItem 4 0 45\n\
++	RepairItem -4 0 45\n\
++	Spawn 0 0 -1\n\
++	Spawn 0 1 0\n\
++	Spawn 0 0 1\n\
++	Spawn 0 -1 0\n\
++	Spawn 0 -2 -2\n\
++	Spawn 0 2 -2\n\
++	Spawn 0 2 2\n\
++	Spawn 0 -2 2\n\
++	", 0);
++		Vector<const char *> args;
++		args.push_back("addbots");
++		args.push_back("s_bot");
++		gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
++		gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
++
++		args[1] = "brain";
++		gamePair.server->addBot(args, ClientInfo::ClassRobotAddedByAddbots);
++
++		EXPECT_EQ(2, gamePair.server->getRobotCount());
++	
++		gamePair.server->getGameType()->setWinningScore(10000000);
++		gamePair.server->getGameType()->setGameTime(60);
++		while(!gamePair.server->getGameType()->isGameOver()) {
++			gamePair.server->unsuspendGame(false);
++			gamePair.idle(10);
++		}
++	}
++}
++
++};
 diff -r abe1c5a72b1b bitfighter_test/TestRobotManager.cpp
 --- a/bitfighter_test/TestRobotManager.cpp	Thu Apr 03 19:53:56 2014 -0700
 +++ /dev/null	Thu Jan 01 00:00:00 1970 +0000
@@ -390,7 +467,7 @@ diff -r abe1c5a72b1b bitfighter_test/TestRobotManager.cpp
 -};
 diff -r abe1c5a72b1b bitfighter_test/main_test.cpp
 --- a/bitfighter_test/main_test.cpp	Thu Apr 03 19:53:56 2014 -0700
-+++ b/bitfighter_test/main_test.cpp	Mon Apr 14 19:51:35 2014 -0700
++++ b/bitfighter_test/main_test.cpp	Mon Apr 14 20:29:30 2014 -0700
 @@ -47,11 +47,11 @@
  int main(int argc, char **argv) 
  {
@@ -410,7 +487,7 @@ diff -r abe1c5a72b1b bitfighter_test/main_test.cpp
  
 diff -r abe1c5a72b1b zap/CMakeLists.txt
 --- a/zap/CMakeLists.txt	Thu Apr 03 19:53:56 2014 -0700
-+++ b/zap/CMakeLists.txt	Mon Apr 14 19:51:35 2014 -0700
++++ b/zap/CMakeLists.txt	Mon Apr 14 20:29:30 2014 -0700
 @@ -357,6 +357,7 @@
  
  set(TEST_SOURCES
