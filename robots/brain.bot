@@ -7,7 +7,7 @@ local function say(...)
 end
 
 local VERBOSITY = 0
-local EXPERIMENTATION = 0.2
+local EXPERIMENTATION = 0.8
 local function v(...)
 	if VERBOSITY >= 1 then
 		logprint(unpack(arg))
@@ -190,7 +190,8 @@ TARGETTING_ACTIONS = {
 	{
 		name = "target",
 		enact = function()
-			STATE.target = bot:findClosestEnemy(STATE.targetingRange)
+			-- STATE.target = bot:findClosestEnemy(STATE.targetingRange)
+			STATE.target = bot:findClosestEnemy()
 		end
 	},
 	
@@ -266,7 +267,7 @@ MOVEMENT_ACTIONS = {
 			local projectilePos = STATE.closestDangerousProjectile:getPos()
 
 			if botPos and projectilePos then
-				local offset = botPos - projectilePos
+				local offset = projectilePos - botPos
 				bot:setThrustToPt(botPos - offset)
 			end
 		end
@@ -328,21 +329,21 @@ WEAPONS_ACTIONS = {
 		end
 	},
 
-	{
-		name = "burst",
-		enact = function()
-			if bot == nil or STATE.target == nil then
-				return
-			end
+	-- {
+	-- 	name = "burst",
+	-- 	enact = function()
+	-- 		if bot == nil or STATE.target == nil then
+	-- 			return
+	-- 		end
 
-			local solution = bot:getFiringSolution(STATE.target)
+	-- 		local solution = bot:getFiringSolution(STATE.target)
 
-			if solution then
-				bot:setAngle(solution)
-				bot:fireWeapon(Weapon.Burst)
-			end
-		end
-	},
+	-- 		if solution then
+	-- 			bot:setAngle(solution)
+	-- 			bot:fireWeapon(Weapon.Burst)
+	-- 		end
+	-- 	end
+	-- },
 	
 }
 
@@ -465,9 +466,9 @@ function onShipKilled(ship, x, shooter)
 end
 
 function reward()
-	local result = (bot:getHealth() or 0) / 4 / 3
+	local result = (bot:getHealth() or 0) / 2 / 3
 	if STATE.target and STATE.target:getHealth() then
-		result = result + (1.0 - STATE.target:getHealth()) / 4 / 3 * 2
+		result = result + (1.0 - STATE.target:getHealth()) / 2 / 3 * 2
 	end
 	return result
 end

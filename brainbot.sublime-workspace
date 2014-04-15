@@ -1,0 +1,1543 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"unc",
+				"uncertainty"
+			],
+			[
+				"uncert",
+				"uncertaintyReport"
+			],
+			[
+				"uncer",
+				"uncertaintyReport"
+			],
+			[
+				"projec",
+				"projectilePos"
+			],
+			[
+				"clos",
+				"closestDangerousProjectile"
+			],
+			[
+				"stre",
+				"streamName"
+			],
+			[
+				"reco",
+				"record_file"
+			],
+			[
+				"goalZ",
+				"goalZoneMap"
+			],
+			[
+				"triggE",
+				"triggerMap"
+			],
+			[
+				"ren",
+				"renderVertices"
+			],
+			[
+				"objec",
+				"objectType"
+			],
+			[
+				"get",
+				"getSelectedObjects"
+			],
+			[
+				"auto",
+				"autoFlipX"
+			],
+			[
+				"au",
+				"autoFlipX"
+			],
+			[
+				"barr",
+				"barrierEnds"
+			],
+			[
+				"segme",
+				"segmentGeom"
+			],
+			[
+				"right",
+				"rightIntersections"
+			],
+			[
+				"segm",
+				"segmentGeom"
+			],
+			[
+				"last",
+				"lastAngle"
+			],
+			[
+				"hal",
+				"halfAngle"
+			],
+			[
+				"inter",
+				"intersectionPoint"
+			],
+			[
+				"extr",
+				"extrudeSegment"
+			],
+			[
+				"topic",
+				"topic_analytics"
+			],
+			[
+				"val",
+				"validator"
+			],
+			[
+				"exp",
+				"explanation"
+			],
+			[
+				"expl",
+				"explanationLength"
+			],
+			[
+				"ex",
+				"explanation"
+			],
+			[
+				"top",
+				"topic1"
+			],
+			[
+				"occup",
+				"occupation_name"
+			],
+			[
+				"has",
+				"has_and_belongs_to_many"
+			],
+			[
+				"aut",
+				"autocomplete"
+			],
+			[
+				"sele",
+				"selectedTags"
+			],
+			[
+				"selec",
+				"selectedTagsHolder"
+			],
+			[
+				"select",
+				"selectedTags"
+			],
+			[
+				"selected",
+				"selected-tags-holder"
+			],
+			[
+				"setT",
+				"setTagSelected"
+			],
+			[
+				"existin",
+				"existingTag"
+			],
+			[
+				"bor",
+				"border-radius"
+			],
+			[
+				"incompl",
+				"incomplete_total"
+			],
+			[
+				"Top",
+				"TopicAnalytic"
+			],
+			[
+				"Topi",
+				"TopicAnalytic"
+			],
+			[
+				"list-g",
+				"list-group-item"
+			],
+			[
+				"qu",
+				"question_count"
+			],
+			[
+				"quiz_res",
+				"quiz_results_in_bucket"
+			],
+			[
+				"quiz_question_",
+				"quiz_question_result"
+			],
+			[
+				"quiz_ta",
+				"quiz_takers_in_bucket"
+			],
+			[
+				"quiz_taker",
+				"quiz_takers_in_bucket"
+			],
+			[
+				"quiz_re",
+				"quiz_results_in_bucket"
+			],
+			[
+				"question",
+				"questions_in_bucket"
+			],
+			[
+				"quiz_tak",
+				"quiz_taker_id"
+			],
+			[
+				"quiz_resul",
+				"quiz_results"
+			],
+			[
+				"inc",
+				"include"
+			],
+			[
+				"QUI",
+				"QUIZ_TAKER_VECTORS"
+			],
+			[
+				"QU",
+				"QUESTION_VECTORS"
+			],
+			[
+				"QUIZ",
+				"QUIZ_TAKER_VECTORS"
+			],
+			[
+				"analy",
+				"analytic_yesterday"
+			],
+			[
+				"anal",
+				"analytics"
+			],
+			[
+				"A",
+				"Analytic"
+			],
+			[
+				"Anal",
+				"Analytics"
+			],
+			[
+				"Analit",
+				"AnalyticsWorker"
+			],
+			[
+				"questions",
+				"questions_in_bin"
+			],
+			[
+				"quiz_",
+				"quiz_taker_count"
+			],
+			[
+				"quiz_t",
+				"quiz_takers_in_bin"
+			],
+			[
+				"ques",
+				"question_instance"
+			],
+			[
+				"new",
+				"new_quiz_taker"
+			],
+			[
+				"quiz_question",
+				"quiz_question_instances"
+			],
+			[
+				"camp",
+				"campaign2"
+			],
+			[
+				"quiz",
+				"quiz_taker1"
+			],
+			[
+				"gS",
+				"gS3DEnabled"
+			],
+			[
+				"Openg",
+				"OpenGLS3D"
+			],
+			[
+				"EYE_",
+				"EYE_LEFT"
+			],
+			[
+				"MI3",
+				"MI3D_SET_HORIZONTAL_TN_ON"
+			],
+			[
+				"MI",
+				"MI3D_SET_VERTICAL_TN_ON"
+			],
+			[
+				"S3",
+				"S3D_ORIENTATION_VERTICAL"
+			],
+			[
+				"mEn",
+				"mEnabled"
+			],
+			[
+				"mprog",
+				"mS3DProgram"
+			],
+			[
+				"eye",
+				"eyeSeparation"
+			],
+			[
+				"m",
+				"mEyeSeparation"
+			],
+			[
+				"OpenGL",
+				"OpenGLS3DAdapter"
+			],
+			[
+				"mC",
+				"mCurrentEye"
+			],
+			[
+				"curr",
+				"mCurrentEye"
+			],
+			[
+				"mRi",
+				"mRightEyeTexture"
+			],
+			[
+				"mLef",
+				"mLeftEyeTexture"
+			],
+			[
+				"GL_TEXT",
+				"GL_TEXTURE_2D"
+			],
+			[
+				"glCl",
+				"glClearColor"
+			],
+			[
+				"GL_DEP",
+				"GL_DEPTH_BUFFER_BIT"
+			],
+			[
+				"GL_COLO",
+				"GL_COLOR_BUFFER_BIT"
+			],
+			[
+				"text",
+				"textureSlot"
+			],
+			[
+				"mS3",
+				"mS3DProgram"
+			],
+			[
+				"vertex",
+				"vertexSlot"
+			],
+			[
+				"mVert",
+				"mS3DVertexBuffer"
+			],
+			[
+				"mT",
+				"mTransform"
+			],
+			[
+				"mL",
+				"mLeftImageUniform"
+			],
+			[
+				"textu",
+				"textureSlot"
+			],
+			[
+				"Displ",
+				"DisplayObjectContainer	class"
+			],
+			[
+				"Androi",
+				"AndroidS3D"
+			],
+			[
+				"Andro",
+				"AndroidS3D"
+			],
+			[
+				"GetS3",
+				"GetS3DEnabled"
+			],
+			[
+				"lime_",
+				"lime_get_s3d_enabled"
+			],
+			[
+				"MAtri",
+				"Matrix3D	class"
+			],
+			[
+				"frag",
+				"fragmentShaderSource	var"
+			],
+			[
+				"fragmen",
+				"fragmentShaderSource	var"
+			],
+			[
+				"DEPT",
+				"DEPTH_BUFFER_BIT"
+			],
+			[
+				"Multi",
+				"MultitouchInputMode"
+			],
+			[
+				"camer",
+				"cameraPosition	var"
+			],
+			[
+				"stage",
+				"stageWidth"
+			],
+			[
+				"stag",
+				"stageHeight"
+			],
+			[
+				"append",
+				"appendTranslation"
+			],
+			[
+				"focal",
+				"focalLength	var"
+			],
+			[
+				"createP",
+				"createPerspectiveMatrix	function"
+			],
+			[
+				"leftHa",
+				"leftHandedScalar	var"
+			],
+			[
+				"Matrix",
+				"Matrix3D"
+			],
+			[
+				"texCoo",
+				"texCoordBuffer	var"
+			],
+			[
+				"Vect",
+				"Vector3D"
+			],
+			[
+				"UIn",
+				"Uint32Array	js.html"
+			],
+			[
+				"frage",
+				"fragmentShader	var"
+			],
+			[
+				"gl_Fra",
+				"gl_FragCoord"
+			],
+			[
+				"pix",
+				"pixelSizeY	var"
+			],
+			[
+				"pixe",
+				"pixelSizeX	var"
+			],
+			[
+				"eyeR",
+				"eyeResolutionX"
+			],
+			[
+				"init",
+				"initializeShaders	function"
+			],
+			[
+				"Matri",
+				"Matrix3D"
+			],
+			[
+				"S3D",
+				"setS3DEnabled"
+			],
+			[
+				"anim",
+				"animationDuration"
+			],
+			[
+				"anima",
+				"animationDelay"
+			],
+			[
+				"animat",
+				"animationEase"
+			],
+			[
+				"trans",
+				"transformOriginX"
+			],
+			[
+				"transfor",
+				"transformOriginX"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "scripts/strategy.lua",
+			"settings":
+			{
+				"buffer_size": 7650,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "robots/brain.bot",
+			"settings":
+			{
+				"buffer_size": 10241,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/kaen/code/bitfighter/resource/robots/s_bot.bot",
+			"settings":
+			{
+				"buffer_size": 20716,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "levels/braintrain.levelgen",
+			"settings":
+			{
+				"buffer_size": 19,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "stage.sh",
+			"settings":
+			{
+				"buffer_size": 984,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "botplot.py",
+			"settings":
+			{
+				"buffer_size": 3251,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "scripts/nn.lua",
+			"settings":
+			{
+				"buffer_size": 8348,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "Build",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+			[
+				":W",
+				":w - Save"
+			],
+			[
+				":w",
+				":w - Save"
+			],
+			[
+				":",
+				":w - Save"
+			],
+			[
+				":lua",
+				"Set Syntax: Lua"
+			],
+			[
+				":a",
+				":w - Save"
+			],
+			[
+				":lw",
+				"Convert Case: Lower Case"
+			],
+			[
+				":wl",
+				"HTML: Wrap Selection With Tag"
+			],
+			[
+				":Lw",
+				"Convert Case: Lower Case"
+			],
+			[
+				":install ",
+				"Package Control: Install Package"
+			],
+			[
+				":\"w",
+				"Snippet: open(\"path/or/url\", \"w\") { |io| .. }"
+			],
+			[
+				":e",
+				":e - Revert"
+			],
+			[
+				":pack",
+				"Package Control: Install Package"
+			],
+			[
+				":haxe",
+				"Set Syntax: Haxe2"
+			],
+			[
+				":q",
+				"Set Syntax: SQL"
+			],
+			[
+				"bash",
+				"Set Syntax: Shell Script (Bash)"
+			],
+			[
+				"w",
+				"Word Wrap: Toggle"
+			],
+			[
+				":LW",
+				"Convert Case: Lower Case"
+			],
+			[
+				":packag",
+				"Package Control: Install Package"
+			],
+			[
+				":install",
+				"Package Control: Install Package"
+			],
+			[
+				":instal",
+				"Package Control: Install Package"
+			],
+			[
+				":Haxe",
+				"Set Syntax: Haxe2"
+			],
+			[
+				":l",
+				"Haxelib: List Installed"
+			],
+			[
+				":glsl",
+				"Set Syntax: GLSL"
+			],
+			[
+				":hax",
+				"Set Syntax: Haxe2"
+			],
+			[
+				":php",
+				"Set Syntax: PHP"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				":L",
+				"Haxelib: List Installed"
+			],
+			[
+				":inst",
+				"Package Control: Install Package"
+			],
+			[
+				":insta",
+				"Package Control: Install Package"
+			],
+			[
+				":packa",
+				"Package Control: Install Package"
+			],
+			[
+				"preview",
+				"Markdown Preview: Python Markdown: Preview in Browser"
+			],
+			[
+				"previ",
+				"Markdown Preview: Python Markdown: Preview in Browser"
+			],
+			[
+				":preview",
+				"Markdown Preview: Python Markdown: Preview in Browser"
+			],
+			[
+				":markdown",
+				"Markdown Preview: Python Markdown: Preview in Browser"
+			],
+			[
+				"p",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"Markdown Preview: Open Markdown Cheat sheet"
+			],
+			[
+				"mark",
+				"Markdown Preview: Github Flavored Markdown: Preview in Browser"
+			],
+			[
+				":package",
+				"Package Control: Install Package"
+			],
+			[
+				"packag",
+				"Package Control: Install Package"
+			],
+			[
+				":Q",
+				"Set Syntax: SQL"
+			],
+			[
+				":s",
+				":w - Save"
+			],
+			[
+				":we",
+				":w - Save"
+			],
+			[
+				"package con",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: in",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Discover Packages"
+			]
+		],
+		"width": 647.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"markdown_preview()",
+			"markdown_preview",
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/kaen/code/brainbot/robots/brain.bot",
+		"/home/kaen/code/brainbot/stage.sh",
+		"/home/kaen/.config/sublime-text-3/Packages/User/Lua.sublime-settings",
+		"/home/kaen/code/bitfighter/bitfighter_test/TestSettings.cpp",
+		"/home/kaen/code/bitfighter/exe/teleport_explode.wav",
+		"/home/kaen/code/bitfighter/exe/test",
+		"/home/kaen/code/bitfighter/zap/packedfont.c",
+		"/home/kaen/code/bitfighter/zap/ZAP.rc",
+		"/home/kaen/code/bitfighter/exe/zc.level",
+		"/home/kaen/code/bitfighter/zap/gameType.cpp",
+		"/home/kaen/code/bitfighter/COPYING.txt",
+		"/home/kaen/code/bitfighter/alure/codec_aiff.cpp",
+		"/home/kaen/code/bitfighter/doc/html/class_asteroid-members.html",
+		"/home/kaen/code/bitfighter/boost/boost/config/no_tr1/cmath.hpp",
+		"/home/kaen/code/bitfighter/zap/game.cpp",
+		"/home/kaen/code/bitfighter/zap/GameManager.cpp",
+		"/home/kaen/code/bitfighter/gtest/codegear/gtest_all.cc",
+		"/home/kaen/code/bitfighter/exe/lua_helper_functions.lua",
+		"/home/kaen/code/bitfighter/exe/levelgen_helper_functions.lua",
+		"/home/kaen/code/bitfighter/exe/robot_helper_functions.lua",
+		"/home/kaen/code/bitfighter/exe/htf.level",
+		"/home/kaen/code/bitfighter/zap/HelperManager.cpp",
+		"/home/kaen/code/bitfighter/doc/luadocs_html_extra_stylesheet.css",
+		"/home/kaen/code/bitfighter/zap/GeomObject.cpp",
+		"/home/kaen/code/bitfighter/exe/geometry.lua",
+		"/home/kaen/code/bitfighter/exe/levels/subway.level",
+		"/home/kaen/code/bitfighter/exe/subdivide.lua",
+		"/home/kaen/code/bitfighter/exe/levels/subway.levelgen",
+		"/home/kaen/code/bitfighter/alure/stream.cpp",
+		"/home/kaen/code/bitfighter/lua/lua-vec/src/lapi.c",
+		"/home/kaen/code/bitfighter/zap/gameObjectRender.h",
+		"/home/kaen/code/bitfighter/zap/gameObjectRender.cpp",
+		"/home/kaen/code/bitfighter/zap/polygon.cpp",
+		"/home/kaen/code/bitfighter/zap/UIEditor.cpp",
+		"/home/kaen/code/bitfighter/zap/UIEditor.h",
+		"/home/kaen/code/bitfighter/zap/barrier.cpp",
+		"/home/kaen/code/bitfighter/zap/InputCode.h",
+		"/home/kaen/code/bitfighter/zap/InputCodeEnum.h",
+		"/home/kaen/code/bitfighter/gtest/samples/sample10_unittest.cc",
+		"/home/kaen/code/bitfighter/luac.out",
+		"/home/kaen/code/bitfighter/lua/luajit/src/lj_udata.c",
+		"/home/kaen/code/bitfighter/LICENSE.txt",
+		"/home/kaen/code/bitfighter/zap/InputCode.cpp",
+		"/home/kaen/code/bitfighter/boost/boost/mpl/aux_/include_preprocessed.hpp",
+		"/home/kaen/code/bitfighter/boost/boost/type_traits/detail/ice_not.hpp",
+		"/home/kaen/code/bitfighter/alure/istream.cpp",
+		"/home/kaen/code/bitfighter/build/editmode.txt",
+		"/home/kaen/code/bitfighter/zap/projectile.cpp",
+		"/home/kaen/code/bitfighter/zap/soccerGame.cpp",
+		"/home/kaen/code/bitfighter/zap/speedZone.cpp",
+		"/home/kaen/code/bitfighter/zap/BfObject.h",
+		"/home/kaen/code/bitfighter/zap/CoreGame.h",
+		"/home/kaen/code/bitfighter/zap/EngineeredItem.h",
+		"/home/kaen/code/bitfighter/zap/LineItem.h",
+		"/home/kaen/code/bitfighter/zap/NexusGame.h",
+		"/home/kaen/code/bitfighter/zap/SimpleLine.h",
+		"/home/kaen/code/bitfighter/zap/SlipZone.h",
+		"/home/kaen/code/bitfighter/zap/Spawn.h",
+		"/home/kaen/code/bitfighter/zap/Teleporter.h",
+		"/home/kaen/code/bitfighter/zap/TextItem.h",
+		"/home/kaen/code/bitfighter/zap/Zone.h",
+		"/home/kaen/code/bitfighter/zap/barrier.h",
+		"/home/kaen/code/bitfighter/zap/goalZone.h",
+		"/home/kaen/code/bitfighter/zap/item.h",
+		"/home/kaen/code/bitfighter/zap/loadoutZone.h",
+		"/home/kaen/code/bitfighter/zap/polygon.h",
+		"/home/kaen/code/bitfighter/zap/projectile.h",
+		"/home/kaen/code/bitfighter/zap/soccerGame.h",
+		"/home/kaen/code/bitfighter/zap/speedZone.h",
+		"/home/kaen/code/bitfighter/zap/BfObject.cpp",
+		"/home/kaen/code/bitfighter/zap/CoreGame.cpp",
+		"/home/kaen/code/bitfighter/zap/EngineeredItem.cpp",
+		"/home/kaen/code/bitfighter/zap/LineItem.cpp",
+		"/home/kaen/code/bitfighter/zap/NexusGame.cpp",
+		"/home/kaen/code/bitfighter/zap/SimpleLine.cpp",
+		"/home/kaen/code/bitfighter/zap/SlipZone.cpp",
+		"/home/kaen/code/bitfighter/zap/Spawn.cpp",
+		"/home/kaen/code/bitfighter/zap/Teleporter.cpp",
+		"/home/kaen/code/bitfighter/zap/TextItem.cpp",
+		"/home/kaen/code/bitfighter/zap/Zone.cpp",
+		"/home/kaen/code/bitfighter/zap/goalZone.cpp",
+		"/home/kaen/code/bitfighter/zap/item.cpp",
+		"/home/kaen/code/bitfighter/zap/loadoutZone.cpp",
+		"/home/kaen/code/bitfighter/zap/FontManager.cpp",
+		"/home/kaen/code/bitfighter/zap/FontManager.h",
+		"/home/kaen/code/bitfighter/zap/FontContextEnum.h",
+		"/home/kaen/code/kaentools/editor_plugins/manywalls.lua",
+		"/home/kaen/code/kaentools/editor_plugins/completion_generator.lua",
+		"/home/kaen/code/kaentools/editor_plugins/autoborder.lua",
+		"/home/kaen/code/kaentools/editor_plugins/scissor.lua",
+		"/home/kaen/code/bitfighter/zap/GeomUtils.cpp",
+		"/home/kaen/code/kaentools/stardust.sublime-project",
+		"/home/kaen/code/kaentools/editor_plugins/barrier_to_polywall.lua",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/analytics/topic_analytics/_topic_analytic.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/acquisition_analytic.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/spec/controllers/admin/quiz_questions_controller_spec.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/quiz_question.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/controllers/admin/quiz_questions_controller.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/bulk_questions_builder.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/spec/models/bulk_questions_builder_spec.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/spec/factories/quiz_questions.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/assets/javascripts/views/checkups/checkups_show.js",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/spec/models/quiz_question_spec.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/quiz_questions/_form.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/assets/javascripts/quiz_questions.js",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/quiz_questions/_quiz_question_fields.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/controllers/occupations_controller.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/db/migrate/20140324215234_create_occupations.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/spec/controllers/occupations_controller_spec.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/layouts/_navigation_links.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/occupations/show.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/occupations/_form.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/db/migrate/20140324202434_create_admin_occupations.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/topic.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/occupation.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/models/ability.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/index.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/index.json.jbuilder",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/new.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/show.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/show.json.jbuilder",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/_form.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations/edit.html.haml",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/controllers/admin/occupations_controller.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/app/helpers/admin/occupations_helper.rb",
+		"/home/kaen/code/hwweb-onboard-quiz-staging/config/routes.rb",
+		"/home/kaen/topics.rb",
+		"/home/kaen/Downloads/Pro Leveling - By Profession.csv"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/home/kaen/code/bitfighter/zap",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/app/",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/app/views/admin/occupations",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/app/assets/javascripts",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/app",
+			"/home/kaen/code/hwweb-onboard-quiz-staging/app/assets/javascripts",
+			"",
+			"/home/kaen/code/lime/project/",
+			"",
+			"/home/kaen/code/",
+			"/home/kaen/code/openfl-native",
+			"/home/kaen/code/lime/project/",
+			"/home/kaen/code/lime/project/src/backend/sdl",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"learn",
+			"uncer",
+			"uncerta",
+			"RECORD_STATES",
+			"create",
+			"learningr",
+			"reward_dis",
+			"plo",
+			"targett",
+			"attackNearbyEnemies",
+			"target",
+			"burst",
+			"3,",
+			"2",
+			"report",
+			"State.closestDangerousProjectile",
+			"State",
+			"learn",
+			"argument",
+			"record_file",
+			"filename",
+			"prin",
+			"streams",
+			"plt",
+			".plan",
+			"learn",
+			"reward",
+			"train",
+			"State.target",
+			"person",
+			"state.",
+			"comf",
+			"comfor",
+			"_ACT",
+			"learn",
+			"shipkill",
+			"vv",
+			"experi",
+			"strat",
+			"uncertainty",
+			"uncertain",
+			"uncerta",
+			"experi",
+			"shipk",
+			"recor",
+			"totrain",
+			"EXPER",
+			"gstrat",
+			"function on",
+			"onscor",
+			"logp",
+			"for",
+			"verbos",
+			"plan",
+			"INPU",
+			"plan",
+			"plan(",
+			"forewa",
+			"arg",
+			"INPUT",
+			"INPU",
+			"fore",
+			"forewar",
+			"strat",
+			"function on",
+			"winnings",
+			".getServer()",
+			"getSer",
+			"winning",
+			"score",
+			"setsco",
+			"gameov",
+			"RobotTest",
+			"tunnelGroup",
+			"tunnelGroups",
+			"tunnelGroup",
+			"triggerMap",
+			"Tunne",
+			"50",
+			"direct",
+			"luaisP",
+			"tabl",
+			"luaIsPoint",
+			"onSelect",
+			"setSelec",
+			"getEdi",
+			"checkPluginKeyBindings",
+			"onke",
+			"BACKQU",
+			"BINDING_",
+			"BACKQU",
+			"mousedra",
+			"BACKQU",
+			"KEY_BA",
+			"KEY_BACKQUOTE",
+			"back",
+			"KEY_CAPSLOCK",
+			"findSna",
+			"findSnapVertex",
+			"onMouseDragged_StartDragging",
+			"mDraggingObjects",
+			"drag",
+			"ondrag",
+			"dragst",
+			"mvertex",
+			"find",
+			"findsn",
+			"mSnapVertexIndex",
+			"snapver",
+			"findsnap",
+			"void renderEditor\\(F32 currentScale, bool snappingToWallCornersEnabled\\)",
+			"void (\\w+::)renderEditor\\(F32 currentScale, bool snappingToWallCornersEnabled\\)",
+			"void (\\w+::)?renderEditor\\(F32 currentScale, bool snappingToWallCornersEnabled\\)",
+			"void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)",
+			"void (\\w+::)?renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)",
+			"void (?:\\w+::)renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)",
+			"void (\\w+::)renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)",
+			"void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled)",
+			"void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled);",
+			"::render(",
+			"render",
+			"vert",
+			"renderVert",
+			"repeat",
+			"TARGET_TYPES",
+			"Line",
+			"Speed",
+			"oldGeom"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"void renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices = false)",
+			"void \\1renderEditor(F32 currentScale, bool snappingToWallCornersEnabled, bool renderVertices)",
+			"admin_occupation",
+			"",
+			"SUM\\(\\1\\) AS \\1,",
+			"SUM(\\1) AS \\1,",
+			"SUM(\\1) AS \\1",
+			"SUM(\\1) AS \\1,",
+			"quiz_result",
+			"MEDIUM",
+			"SOURCE",
+			"SOURCES",
+			"\\2: '\\1',",
+			"\\1 \\(",
+			"::",
+			"\\1 -- \\2",
+			"  \\1",
+			"\\1",
+			"SetEnabled",
+			"mGetStatusMethodID",
+			"mControlMethodID",
+			"mCloseMethodID",
+			"mOffFieldID",
+			"mVerticalOnFieldID",
+			"mHorizontalOnFieldID",
+			"Framebuffer",
+			" {",
+			"$marginWidth\\1",
+			"$",
+			"%",
+			"\\1\\2",
+			"$",
+			"%",
+			"\\1\\2",
+			"@mixin ",
+			"$",
+			"%",
+			"\\1\\2",
+			"$",
+			"%",
+			"\\1\\2",
+			"%",
+			"\\1\\2",
+			"@import",
+			"$",
+			"@import",
+			"$",
+			"value=\"\\1\" <?php if($item_detail->service == \"\\1\"): echo \"selected\"; endif; ?>",
+			"",
+			"method",
+			"description",
+			"Image_url",
+			"Method",
+			"Description",
+			"//------------------------------------------------------------------------------\n// Copyright Chris Eykamp\n// See LICENSE.txt for full copyright info\n//------------------------------------------------------------------------------",
+			"User",
+			"round",
+			" ",
+			"function sd.",
+			"[i",
+			"\\2\\1",
+			"3",
+			"2",
+			"local function",
+			"S32",
+			"int",
+			"getObjType",
+			"",
+			", "
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "scripts/strategy.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7650,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								859,
+								859
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 421.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "robots/brain.bot",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10241,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9262,
+								9262
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 7648.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "/home/kaen/code/bitfighter/resource/robots/s_bot.bot",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 20716,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								20378,
+								20378
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 8115.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "levels/braintrain.levelgen",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 19,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								16,
+								16
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "stage.sh",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 984,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								982,
+								982
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/ShellScript/Shell-Unix-Generic.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 31.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "botplot.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3251,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1140,
+								1140
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 134.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "scripts/nn.lua",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8348,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1775,
+								1775
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Lua/Lua.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 816.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 34.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 155.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"project": "brainbot.sublime-project",
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"nn",
+				"scripts/nn.lua"
+			],
+			[
+				"st",
+				"scripts/strategy.lua"
+			],
+			[
+				"tesuth",
+				"bitfighter_test/TestUtils.h"
+			],
+			[
+				"zapcmak",
+				"zap/CMakeLists.txt"
+			],
+			[
+				"gamet",
+				"zap/gameType.cpp"
+			],
+			[
+				"gamety",
+				"zap/gameType.h"
+			],
+			[
+				"helplua",
+				"exe/robot_helper_functions.lua"
+			],
+			[
+				"goalz",
+				"zap/goalZone.cpp"
+			],
+			[
+				"suble",
+				"exe/levels/subway.levelgen"
+			],
+			[
+				"subw",
+				"exe/levels/subway.levelgen"
+			],
+			[
+				"luabase",
+				"zap/LuaBase.cpp"
+			],
+			[
+				"inputcode.h",
+				"zap/InputCode.h"
+			],
+			[
+				"s3d.hx",
+				"openfl-native/openfl/display/S3D.hx"
+			],
+			[
+				"empty/s3",
+				"lime/project/src/common/empty/S3D.cpp"
+			],
+			[
+				"s3d.h",
+				"lime/project/include/renderer/common/S3D.h"
+			],
+			[
+				"opengls3",
+				"lime/project/src/renderer/opengl/OpenGLS3D.cpp"
+			],
+			[
+				"android",
+				"lime/project/src/platform/android/AndroidS3D.cpp"
+			],
+			[
+				"glcontext",
+				"lime/project/include/renderer/opengl/OpenGLContext.h"
+			],
+			[
+				"hardware",
+				"lime/project/include/renderer/common/HardwareContext.h"
+			],
+			[
+				"androids3",
+				"lime/project/src/platform/android/AndroidS3D.cpp"
+			],
+			[
+				"s3deye",
+				"lime/project/include/renderer/common/S3DEye.h"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 262.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

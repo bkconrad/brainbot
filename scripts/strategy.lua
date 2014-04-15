@@ -42,13 +42,13 @@ local function cat(t1, t2)
 	return result
 end
 
+local INITIAL_LEARNING_RATE = 0.1
 local UNCERTAINTY_LEARNING_RATE = 0.001
-local HIDDEN_LAYERS = 1.0
+local HIDDEN_LAYERS = 2.0
 local PLAN_STATES   = 10
-local RECORD_STATES = 3
 -- local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
-local REWARD_DISCOUNT = 0.8
-local LEARNING_DECAY   = .5^(1/500000)
+local REWARD_DISCOUNT = 0.5
+local LEARNING_DECAY   = .5^(1/5000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -81,7 +81,7 @@ function Strategy.create(name, numObservations, actions)
 			-- absorbing state such as dying or killing). The learning rate for
 			-- the training of each phase is equal to LEARNING_RATE^i where i is
 			-- the (positive) index of each phase relative to the most recent.
-			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + 1), 1.0))
+			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations * numObservations + 1), INITIAL_LEARNING_RATE))
 
 			-- The uncertainty networks. There is again one per action, however
 			-- these networks are trained in a different manner than the Q value
@@ -100,7 +100,7 @@ function Strategy.create(name, numObservations, actions)
 			-- continuous state space, we choose to use a neural network in this
 			-- case as well.
 			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations + 1), UNCERTAINTY_LEARNING_RATE))
-			result.uncertaintyNetworks[#result.uncertaintyNetworks]:setWeights(0.5)
+			result.uncertaintyNetworks[#result.uncertaintyNetworks]:setWeights(1.0)
 		end
 	end
 
@@ -126,6 +126,7 @@ function Strategy:plan(observations, experimentation)
 	local bestActionValue = 0
 	local bestActionValueWithBonus = 0
 	local actionReport = { }
+	local uncertaintyReport = nil
 	for i,action in ipairs(self.actions) do
 
 		-- Get the expected value of taking this action in the given state
@@ -135,7 +136,10 @@ function Strategy:plan(observations, experimentation)
 		-- Add a bonus to actions with high uncertainty regarding their effects
 		local valueWithBonus = value
 		if experimentation > 0 then
-			valueWithBonus = valueWithBonus + experimentation * self.uncertaintyNetworks[i]:forewardPropagate(observations)[1]
+			uncertaintyReport = uncertaintyReport or { }
+			local uncertainty = self.uncertaintyNetworks[i]:forewardPropagate(observations)[1]
+			uncertaintyReport[action.name] = uncertainty
+			valueWithBonus = valueWithBonus + experimentation * uncertainty
 		end
 
 		-- Keep the best action
@@ -154,6 +158,10 @@ function Strategy:plan(observations, experimentation)
 	}
 
 	report(self.name, actionReport)
+	if uncertaintyReport ~= nil then
+		report(self.name .. '_uncertainty', actionReport)
+	end
+
 
 	vv(self.actions[bestActionIndex].name)
 	vv()
@@ -184,10 +192,10 @@ function Strategy:learn(reward)
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
-		local thisReward = phase.reward + REWARD_DISCOUNT * lastReward
+		local thisReward = .3 * REWARD_DISCOUNT * phase.reward + .7 * REWARD_DISCOUNT * lastReward
 
 		-- Reinforced reward
-		local desiredOutputs = { thisReward + lastValue - phase.actionValue }
+		local desiredOutputs = { thisReward / 2 + (lastValue - phase.actionValue) / 2 }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
 		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { math.abs(desiredOutputs[1] - phase.actionValue) })

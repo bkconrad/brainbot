@@ -39,8 +39,8 @@ def parseChunk(chunk):
 
 		if not streams.get(streamName):
 			streams[streamName] = { }
-			streams[streamName]['axes'] = plt.subplot(2, 3, len(streams.keys()))
-			streams[streamName]['axes'].set_title(streamName)
+			streams[streamName]['axes'] = plt.subplot(4, 3, len(streams.keys()))
+			streams[streamName]['axes'].set_title(streamName, {'fontsize': 'small'})
 
 		stream = streams[streamName]
 
@@ -76,7 +76,7 @@ with open(reporting_filename, 'r+', 1) as reporting_file, open(record_filename, 
 		i += 1
 
 	# set up our record graphs
-	record_axes = plt.subplot(2, 3, 6)
+	record_axes = plt.subplot(4, 3, 12)
 	graph2 = plt.plot(x[:-100], running_sum_fast(y, 100)[:-100],    'b', linewidth=1)[0]
 	graph3 = plt.plot(x[:-1000], running_sum_fast(y, 1000)[:-1000], 'r', linewidth=1)[0]
 
