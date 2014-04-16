@@ -1,8 +1,8 @@
 ACTIVATION_RESPONSE = 1
 
 NeuralNetwork = {
-	transfer = function(x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
-	-- transfer = function(x) local tmp = math.exp(2*x) ; return (tmp - 1)/(tmp + 1) end --This is the Transfer function (in this case a sigmoid)
+	-- transfer = function(x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
+	transfer = function(x) local tmp = math.exp(2*x) ; return (tmp - 1)/(tmp + 1) end --This is the Transfer function (in this case a sigmoid)
 }
 
 function getn(t)
@@ -37,10 +37,10 @@ function NeuralNetwork.create( _numInputs, _numOutputs, _numHiddenLayers, _neuro
 			neuronsInLayer = _numOutputs
 		end
 		for j = 1,neuronsInLayer do
-			network[i][j] = {bias = math.random()*2-1}
+			network[i][j] = {bias = math.random()}
 			local numNeuronInputs = getn(network[i-1])
 			for k = 1,numNeuronInputs do
-				network[i][j][k] = math.random()*2-1  --return random number between -1 and 1
+				network[i][j][k] = math.random()
 			end
 		end
 	end
