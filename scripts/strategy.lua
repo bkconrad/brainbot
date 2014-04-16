@@ -48,7 +48,7 @@ local HIDDEN_LAYERS = 2.0
 local PLAN_STATES   = 10
 -- local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
 local REWARD_DISCOUNT = 0.5
-local LEARNING_DECAY   = .5^(1/5000)
+local LEARNING_DECAY   = .5^(1/50000)
 
 function Strategy.create(name, numObservations, actions)
 	local result = copy(Strategy)
@@ -81,7 +81,7 @@ function Strategy.create(name, numObservations, actions)
 			-- absorbing state such as dying or killing). The learning rate for
 			-- the training of each phase is equal to LEARNING_RATE^i where i is
 			-- the (positive) index of each phase relative to the most recent.
-			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, HIDDEN_LAYERS, (numObservations * numObservations + 1), INITIAL_LEARNING_RATE))
+			table.insert(result.networks, NeuralNetwork.create(numObservations, 1, nil, nil, INITIAL_LEARNING_RATE))
 
 			-- The uncertainty networks. There is again one per action, however
 			-- these networks are trained in a different manner than the Q value
@@ -99,7 +99,7 @@ function Strategy.create(name, numObservations, actions)
 			-- lookup of table mapping state-actions to counts. Because of the
 			-- continuous state space, we choose to use a neural network in this
 			-- case as well.
-			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, 1, (numObservations + 1), UNCERTAINTY_LEARNING_RATE))
+			table.insert(result.uncertaintyNetworks, NeuralNetwork.create(numObservations, 1, 1, nil, UNCERTAINTY_LEARNING_RATE))
 			-- result.uncertaintyNetworks[#result.uncertaintyNetworks]:setWeights(1.0)
 		end
 	end
