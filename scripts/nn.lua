@@ -1,7 +1,7 @@
 ACTIVATION_RESPONSE = 1
 
 NeuralNetwork = {
-	transfer = function(x) return 1 / (1 + math.exp(-x / ACTIVATION_RESPONSE)) end --This is the Transfer function (in this case a sigmoid)
+	transfer = function(x) return math.tanh(x) end
 }
 
 function getn(t)
