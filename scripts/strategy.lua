@@ -43,7 +43,7 @@ local function cat(t1, t2)
 end
 
 local INITIAL_LEARNING_RATE = 0.5
-local UNCERTAINTY_LEARNING_RATE = 0.01
+local UNCERTAINTY_LEARNING_RATE = 0.001
 local HIDDEN_LAYERS = 2.0
 local PLAN_STATES   = 10
 -- local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
@@ -196,7 +196,7 @@ function Strategy:learn(reward)
 		local desiredOutputs = { thisReward / 2 + (lastValue - phase.actionValue) / 2 }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
-		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { math.abs(desiredOutputs[1] - phase.actionValue) })
+		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { desiredOutputs[1] - phase.actionValue })
 
 		lastReward = thisReward
 		lastValue = phase.actionValue
