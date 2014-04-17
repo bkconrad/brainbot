@@ -184,8 +184,6 @@ function Strategy:learn(reward)
 
 	v(self.name..' learning with reward = '..reward)
 
-	reward = math.min(math.max(reward, 0), 1)
-
 	-- Evaluate old plans
 	local lastReward = reward
 	local lastValue = 0
