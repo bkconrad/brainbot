@@ -42,8 +42,8 @@ local function cat(t1, t2)
 	return result
 end
 
-local INITIAL_LEARNING_RATE = 0.1
-local UNCERTAINTY_LEARNING_RATE = 0.001
+local INITIAL_LEARNING_RATE = 0.5
+local UNCERTAINTY_LEARNING_RATE = 0.01
 local HIDDEN_LAYERS = 2.0
 local PLAN_STATES   = 10
 -- local REWARD_DISCOUNT  = .5^(1/PLAN_STATES) -- Halflife of PLAN_STATES
