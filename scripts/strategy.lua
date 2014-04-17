@@ -1,8 +1,8 @@
 local NeuralNetwork = require('nn')
 local Strategy = { verbosity = 0, report = false }
 
-local function report(name, data)
-	if Strategy.report then
+local function report(name, data, force)
+	if Strategy.report or force then
 		local result = name .. ":\n"
 		for k,v in pairs(data) do
 			result = result .. "- " .. tostring(k) .. ": " .. tostring(v) .. "\n"
@@ -187,20 +187,35 @@ function Strategy:learn(reward)
 	-- Evaluate old plans
 	local lastReward = reward
 	local lastValue = 0
+
+	learningReport = {
+		reward = 0,
+		expected = 0,
+		actual = 0,
+		error = 0
+	}
 	for i = #self.history,1,-1 do
 
 		local phase = self.history[i]
 		local thisReward = .3 * REWARD_DISCOUNT * phase.reward + .7 * REWARD_DISCOUNT * lastReward
+		learningReport.reward = learningReport.reward + thisReward
 
 		-- Reinforced reward
 		local desiredOutputs = { thisReward / 2 + (lastValue - phase.actionValue) / 2 }
 		self.networks[phase.actionIndex].learningRate = self.networks[phase.actionIndex].learningRate * LEARNING_DECAY
 		self.networks[phase.actionIndex]:backwardPropagate(phase.startingInputs, desiredOutputs)
-		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { desiredOutputs[1] - phase.actionValue })
+
+		learningReport.expected = learningReport.expected + phase.actionValue
+		learningReport.actual = learningReport.actual + desiredOutputs[1]
+		local predictionError = desiredOutputs[1] - phase.actionValue
+		learningReport.error = learningReport.error + predictionError
+		self.uncertaintyNetworks[phase.actionIndex]:backwardPropagate(phase.startingInputs, { predictionError })
 
 		lastReward = thisReward
 		lastValue = phase.actionValue
 	end
+
+	report('learning', learningReport, true)
 
 	self:save()
 
